@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"c:/Users/osmar/Desktop/Massage/app/\\(dashboard\\)\" -type f)",
+      "Bash(npx prisma:*)",
+      "Bash(node -e \"const {PrismaClient} = require\\(''@prisma/client''\\); const p = new PrismaClient\\(\\); p.membershipPlan.findMany\\({select:{id:true,name:true,isActive:true,isPopular:true}}\\).then\\(r=>console.log\\(JSON.stringify\\(r\\)\\)\\).catch\\(e=>console.error\\(''ERROR:'',e.message\\)\\).finally\\(\\(\\)=>p.$disconnect\\(\\)\\)\")",
+      "Bash(node -e \"require\\(''''next/font/google''''\\)\")",
+      "Bash(npx tsc:*)",
+      "Bash(node -e \"require\\(''''stripe''''\\)\")",
+      "Bash(npm install:*)",
+      "Bash(node -e \"require\\(''stripe''\\); console.log\\(''stripe ok'', require\\(''./node_modules/stripe/package.json''\\).version\\)\")",
+      "Bash(node -e \":*)",
+      "Bash(ls -la \"c:/Users/osmar/Desktop/Massage/node_modules/.prisma/client/\"*.tmp*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\osmar\\Desktop\\Massage\\app\\admin",
+      "c:\\Users\\osmar\\Desktop\\Massage\\app\\api\\memberships"
+    ]
+  }
+}

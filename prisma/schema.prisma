@@ -1,0 +1,305 @@
+// Serene Studio - Massage Therapy CRM
+// Premium SaaS Platform Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth Models ─────────────────────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Core Models ─────────────────────────────────────────────────────────────
+
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  emailVerified       DateTime?
+  name                String?
+  phone               String?
+  passwordHash        String?
+  role                String    @default("USER") // ADMIN | USER
+  status              String    @default("ACTIVE") // ACTIVE | INACTIVE | PENDING
+  avatarUrl           String?
+  registrationToken   String?   @unique
+  registrationExpires DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  accounts       Account[]
+  sessions       Session[]
+  client         Client?
+  memberships    UserMembership[]
+  purchases      ContentPurchase[]
+  albumPurchases AlbumPurchase[]
+  paymentIntents PaymentIntent[]
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One-to-one with User (optional — client may exist without account)
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id])
+
+  // Relations
+  bookings Booking[]
+}
+
+// ─── Booking / Services ───────────────────────────────────────────────────────
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  duration    Int      // minutes
+  price       Float
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings Booking[]
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  date      DateTime
+  duration  Int      // minutes (can override service default)
+  notes     String?
+  status    String   @default("PENDING") // PENDING | CONFIRMED | COMPLETED | CANCELLED | NO_SHOW
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id])
+  serviceId String?
+  service   Service? @relation(fields: [serviceId], references: [id])
+}
+
+// ─── Memberships ─────────────────────────────────────────────────────────────
+
+model MembershipPlan {
+  id             String  @id @default(cuid())
+  name           String  // Normal | VIP | Premium
+  level          Int     // 1 = Normal, 2 = VIP, 3 = Premium
+  description    String?
+  price          Float
+  billingCycle   String  @default("MONTHLY") // MONTHLY | WEEKLY
+  features       String  // JSON array stored as string
+  isActive         Boolean @default(true)
+  isPopular        Boolean @default(false)
+  stripeProductId  String? // Stripe Product ID (prod_xxx)
+  stripePriceId    String? // Stripe recurring Price ID (price_xxx) for subscription billing
+  createdAt        DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  userMemberships  UserMembership[]
+  contentAccess    ContentMembershipAccess[]
+  albumAccess      AlbumMembershipAccess[]
+}
+
+model UserMembership {
+  id        String   @id @default(cuid())
+  status    String   @default("ACTIVE") // ACTIVE | CANCELLED | EXPIRED | PENDING
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  autoRenew Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  planId String
+  plan   MembershipPlan @relation(fields: [planId], references: [id])
+}
+
+// ─── Content ─────────────────────────────────────────────────────────────────
+
+model Content {
+  id                      String    @id @default(cuid())
+  title                   String
+  description             String?
+  mediaType               String    @default("VIDEO") // VIDEO | AUDIO | IMAGE | PDF | TEXT
+  contentUrl              String?
+  thumbnailUrl            String?
+  status                  String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  publishDate             DateTime?
+  separatePurchaseEnabled Boolean   @default(false)
+  separatePurchasePrice   Float?
+  stripeProductId         String?   // Stripe Product ID (prod_xxx)
+  stripePriceId           String?   // Stripe one-time Price ID (price_xxx) for standalone purchase
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  membershipAccess ContentMembershipAccess[]
+  purchases        ContentPurchase[]
+}
+
+model ContentMembershipAccess {
+  id        String @id @default(cuid())
+  contentId String
+  content   Content        @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  planId    String
+  plan      MembershipPlan @relation(fields: [planId], references: [id])
+
+  @@unique([contentId, planId])
+}
+
+model ContentPurchase {
+  id          String   @id @default(cuid())
+  pricePaid   Float
+  purchasedAt DateTime @default(now())
+  status      String   @default("ACTIVE") // ACTIVE | REFUNDED
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  contentId String
+  content   Content @relation(fields: [contentId], references: [id])
+
+  @@unique([userId, contentId])
+}
+
+// ─── Albums ──────────────────────────────────────────────────────────────────
+
+model Album {
+  id                      String    @id @default(cuid())
+  title                   String
+  description             String?
+  coverImageUrl           String?
+  status                  String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  publishDate             DateTime?
+  separatePurchaseEnabled Boolean   @default(false)
+  separatePurchasePrice   Float?
+  stripeProductId         String?
+  stripePriceId           String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  items            AlbumItem[]
+  membershipAccess AlbumMembershipAccess[]
+  purchases        AlbumPurchase[]
+}
+
+model AlbumItem {
+  id        String   @id @default(cuid())
+  albumId   String
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  mediaUrl  String
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model AlbumMembershipAccess {
+  id      String         @id @default(cuid())
+  albumId String
+  album   Album          @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  planId  String
+  plan    MembershipPlan @relation(fields: [planId], references: [id])
+
+  @@unique([albumId, planId])
+}
+
+model AlbumPurchase {
+  id          String   @id @default(cuid())
+  pricePaid   Float
+  purchasedAt DateTime @default(now())
+  status      String   @default("ACTIVE") // ACTIVE | REFUNDED
+
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  albumId String
+  album   Album  @relation(fields: [albumId], references: [id])
+
+  @@unique([userId, albumId])
+}
+
+// ─── Payments ────────────────────────────────────────────────────────────────
+
+model PaymentIntent {
+  id               String   @id @default(cuid())
+  type             String   // MEMBERSHIP | CONTENT
+  targetId         String   // planId or contentId
+  amount           Float
+  currency         String   @default("USD")
+  status           String   @default("PENDING") // PENDING | COMPLETED | FAILED | REFUNDED
+  stripeIntentId   String?  // payment_intent id from Stripe
+  stripeSessionId  String?  @unique // checkout.session id from Stripe
+  email            String   // for pre-registration flow
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+}
+
+// ─── Settings (Singleton) ────────────────────────────────────────────────────
+
+model BusinessInfo {
+  id           String   @id @default(cuid())
+  businessName String
+  address      String?
+  workingHours String?  // JSON
+  phone        String?
+  email        String?
+  description  String?
+  logoUrl      String?
+  updatedAt    DateTime @updatedAt
+}
+
+model BotSettings {
+  id                  String   @id @default(cuid())
+  businessName        String?
+  tone                String?  @default("Professional")
+  personalityDesc     String?
+  responseStyle       String?  @default("Concise")
+  emojiUsage          Boolean  @default(false)
+  greetingMessage     String?
+  fallbackMessage     String?
+  updatedAt           DateTime @updatedAt
+}
