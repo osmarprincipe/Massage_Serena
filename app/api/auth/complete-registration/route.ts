@@ -79,6 +79,6 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     message: "Account activated successfully",
-    activatedMemberships: activated.count,
+    activatedMemberships: pendingMemberships.length,
   });
 }
