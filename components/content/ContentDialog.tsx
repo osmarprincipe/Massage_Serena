@@ -551,7 +551,7 @@ export function ContentDialog({ open, onClose, content, album, onSaved }: Conten
                             Cover image set
                           </p>
                           <p className="text-[10px]" style={{ color: "#8a7f78" }}>
-                            Click to adjust how it's cropped in cards
+                            Click to adjust how it&apos;s cropped in cards
                           </p>
                         </div>
                       </div>

@@ -245,7 +245,7 @@ export function PlanDialog({ open, onClose, plan, onSaved }: PlanDialogProps) {
               <div className="flex items-center justify-between px-4 py-3.5">
                 <div>
                   <p className="text-sm font-medium text-foreground">Most Popular</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Shows a "Most Popular" badge on this plan</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Shows a &quot;Most Popular&quot; badge on this plan</p>
                 </div>
                 <Switch checked={watch("isPopular")} onCheckedChange={(v) => setValue("isPopular", v)} />
               </div>

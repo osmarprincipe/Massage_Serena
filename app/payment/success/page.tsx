@@ -88,7 +88,7 @@ export default function PaymentSuccessPage() {
                 </h2>
                 <p style={{ color: "#8a7f78" }}>{errorMsg}</p>
                 <p className="text-sm mt-2" style={{ color: "#6b5040" }}>
-                  Your payment was received. Please contact support and we'll sort it out immediately.
+                  Your payment was received. Please contact support and we&apos;ll sort it out immediately.
                 </p>
               </div>
               <Link href="/app/dashboard">

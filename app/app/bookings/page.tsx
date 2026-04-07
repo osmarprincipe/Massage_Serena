@@ -54,7 +54,7 @@ function BookingCard({ booking, isPast }: { booking: any; isPast?: boolean }) {
         </div>
         {booking.notes && (
           <p className="mt-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 italic line-clamp-2">
-            "{booking.notes}"
+            &quot;{booking.notes}&quot;
           </p>
         )}
       </div>
