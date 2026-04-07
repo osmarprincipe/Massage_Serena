@@ -69,44 +69,54 @@ export default function CompleteRegistrationPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      {/* Background decoration */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold-100/40 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-mocha-100/30 blur-3xl" />
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden" style={{ background: "#070507" }}>
+      {/* Ambient glows */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div style={{ position: "absolute", top: "-15%", right: "-10%", width: "600px", height: "600px", background: "radial-gradient(circle, rgba(161,18,47,0.15) 0%, transparent 65%)", borderRadius: "50%" }} />
+        <div style={{ position: "absolute", bottom: "-15%", left: "-8%", width: "500px", height: "500px", background: "radial-gradient(circle, rgba(161,18,47,0.08) 0%, transparent 65%)", borderRadius: "50%" }} />
       </div>
 
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-mocha-500 to-gold-500 shadow-soft">
+          <div className="p-2.5 rounded-xl" style={{ background: "linear-gradient(135deg, #a1122f, #c6293e)", boxShadow: "0 0 22px rgba(161,18,47,0.42)" }}>
             <Sparkles className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-semibold font-display">Serene Studio</span>
+          <span className="text-xl font-semibold font-display" style={{ color: "#f5ede6" }}>Serene Studio</span>
         </div>
 
         {/* Card */}
-        <div className="bg-card rounded-3xl border border-border shadow-premium p-8">
+        <div className="rounded-2xl p-8 animate-fade-in"
+          style={{
+            background: "rgba(9,5,7,0.90)",
+            backdropFilter: "blur(44px)",
+            WebkitBackdropFilter: "blur(44px)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            boxShadow: "0 40px 100px rgba(0,0,0,0.72), 0 0 0 1px rgba(161,18,47,0.07), inset 0 1px 0 rgba(255,255,255,0.05)",
+          }}>
           {step < 3 ? (
             <>
               {/* Header */}
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold font-display text-foreground mb-2">
+              <div className="text-center mb-7">
+                <h2 className="text-[22px] font-bold font-display mb-1.5" style={{ color: "#f5ede6", letterSpacing: "-0.020em" }}>
                   Complete your account
                 </h2>
-                <p className="text-sm text-muted-foreground">
-                  Welcome! Set up your profile to access your membership.
+                <p className="text-sm" style={{ color: "#7a7068" }}>
+                  Set up your profile to access your membership.
                 </p>
               </div>
 
-              {/* Progress */}
-              <div className="flex items-center gap-2 mb-8">
+              {/* Progress bar */}
+              <div className="flex items-center gap-2 mb-7">
                 {[0, 1].map((i) => (
                   <div
                     key={i}
-                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-                      i < step ? "bg-primary" : "bg-muted"
-                    }`}
+                    className="h-1 flex-1 rounded-full transition-all duration-500"
+                    style={{
+                      background: i < step
+                        ? "linear-gradient(90deg, #a1122f, #c6293e)"
+                        : "rgba(255,255,255,0.08)",
+                    }}
                   />
                 ))}
               </div>
@@ -114,83 +124,77 @@ export default function CompleteRegistrationPage() {
               {/* Form */}
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="space-y-1.5">
-                  <Label>Full Name</Label>
-                  <Input
-                    placeholder="Your full name"
-                    {...register("name")}
-                  />
-                  {errors.name && (
-                    <p className="text-xs text-destructive">{errors.name.message}</p>
-                  )}
+                  <Label style={{ color: "#cbbfb6", fontSize: "12px", letterSpacing: "0.03em", textTransform: "uppercase", fontWeight: 600 }}>Full Name</Label>
+                  <Input placeholder="Your full name" {...register("name")} />
+                  {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>
-                    Phone{" "}
-                    <span className="text-muted-foreground font-normal">(optional)</span>
+                  <Label style={{ color: "#cbbfb6", fontSize: "12px", letterSpacing: "0.03em", textTransform: "uppercase", fontWeight: 600 }}>
+                    Phone <span style={{ color: "#8a7f78", fontWeight: 400 }}>(optional)</span>
                   </Label>
                   <Input placeholder="+1 (555) 000-0000" {...register("phone")} />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Password</Label>
-                  <Input
-                    type="password"
-                    placeholder="Create a strong password"
-                    {...register("password")}
-                  />
-                  {errors.password && (
-                    <p className="text-xs text-destructive">{errors.password.message}</p>
-                  )}
+                  <Label style={{ color: "#cbbfb6", fontSize: "12px", letterSpacing: "0.03em", textTransform: "uppercase", fontWeight: 600 }}>Password</Label>
+                  <Input type="password" placeholder="Create a strong password" {...register("password")} />
+                  {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Confirm Password</Label>
-                  <Input
-                    type="password"
-                    placeholder="Repeat your password"
-                    {...register("confirmPassword")}
-                  />
-                  {errors.confirmPassword && (
-                    <p className="text-xs text-destructive">
-                      {errors.confirmPassword.message}
-                    </p>
-                  )}
+                  <Label style={{ color: "#cbbfb6", fontSize: "12px", letterSpacing: "0.03em", textTransform: "uppercase", fontWeight: 600 }}>Confirm Password</Label>
+                  <Input type="password" placeholder="Repeat your password" {...register("confirmPassword")} />
+                  {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
                 </div>
 
-                <Button type="submit" className="w-full h-11 mt-2" loading={loading}>
-                  Create Account
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-11 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+                  style={{
+                    background: "linear-gradient(160deg, #a1122f 0%, #7a0c1c 60%, #560818 100%)",
+                    color: "#f5ede6",
+                    boxShadow: "0 4px 20px rgba(161,18,47,0.40), inset 0 1px 0 rgba(255,255,255,0.08)",
+                  }}
+                  onMouseEnter={e => { if (!loading) { (e.currentTarget as HTMLElement).style.filter = "brightness(1.18)"; } }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.filter = ""; }}
+                >
+                  {loading ? (
+                    <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  ) : (
+                    <>Create Account <ArrowRight className="h-4 w-4" /></>
+                  )}
+                </button>
               </form>
             </>
           ) : (
             /* Success State */
             <div className="text-center py-6 space-y-5">
               <div className="flex items-center justify-center">
-                <div className="p-5 rounded-full bg-emerald-50">
-                  <CheckCircle className="h-10 w-10 text-emerald-500" />
+                <div className="p-5 rounded-full" style={{ background: "rgba(10,80,45,0.30)", border: "1px solid rgba(74,222,128,0.20)" }}>
+                  <CheckCircle className="h-10 w-10" style={{ color: "#4ade80" }} />
                 </div>
               </div>
               <div>
-                <h3 className="text-2xl font-bold font-display text-foreground mb-2">
+                <h3 className="text-2xl font-bold font-display mb-2" style={{ color: "#f5ede6" }}>
                   Account created!
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm" style={{ color: "#8a7f78" }}>
                   Your membership is now active. Redirecting to login...
                 </p>
               </div>
-              <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full animate-[progress_2s_ease-in-out]" style={{ width: "100%" }} />
+              <div className="h-1 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                <div className="h-full rounded-full animate-[progress_2s_ease-in-out]" style={{ width: "100%", background: "linear-gradient(90deg, #a1122f, #c6a15b)" }} />
               </div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground mt-6">
+        <p className="text-center text-xs mt-6" style={{ color: "#8a7f78" }}>
           Already have an account?{" "}
-          <a href="/login" className="text-primary hover:underline font-medium">
+          <a href="/login" className="font-medium transition-colors hover:underline" style={{ color: "#c6a15b" }}>
             Sign in
           </a>
         </p>

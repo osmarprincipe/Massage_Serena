@@ -6,11 +6,10 @@ import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 const schema = z
   .object({
@@ -31,10 +30,18 @@ function SignupForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  const nameReg     = register("name");
+  const emailReg    = register("email");
+  const passReg     = register("password");
+  const confirmReg  = register("confirmPassword");
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -50,7 +57,6 @@ function SignupForm() {
         return;
       }
 
-      // Auto sign-in after account creation
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -72,61 +78,197 @@ function SignupForm() {
     }
   };
 
+  const loginUrl = `/login${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`;
+
+  const inputStyle = (field: string, hasError: boolean) => ({
+    width: "100%",
+    height: "44px",
+    padding: (field === "password" || field === "confirmPassword") ? "0 46px 0 14px" : "0 14px",
+    borderRadius: "12px",
+    background: focusedField === field ? "rgba(255,255,255,0.065)" : "rgba(255,255,255,0.04)",
+    border: hasError
+      ? "1px solid rgba(220,38,38,0.55)"
+      : focusedField === field
+      ? "1px solid rgba(161,18,47,0.50)"
+      : "1px solid rgba(255,255,255,0.09)",
+    color: "#f5ede6",
+    fontSize: "14px",
+    outline: "none",
+    transition: "all 0.18s ease",
+    boxShadow: focusedField === field
+      ? "0 0 0 3px rgba(161,18,47,0.09), 0 1px 6px rgba(0,0,0,0.35)"
+      : "0 1px 4px rgba(0,0,0,0.22)",
+  } as React.CSSProperties);
+
   return (
-    <div className="w-full max-w-[400px] space-y-8">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2.5 mb-6">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-mocha-500 to-gold-500 shadow-soft">
-            <Sparkles className="h-4 w-4 text-white" />
-          </div>
-          <span className="text-lg font-semibold font-display">Serene Studio</span>
+    <div className="w-full space-y-5">
+      {/* Logo */}
+      <div className="flex items-center gap-2.5 mb-1">
+        <div className="p-2 rounded-xl" style={{ background: "linear-gradient(135deg, #a1122f, #c6293e)", boxShadow: "0 0 18px rgba(161,18,47,0.40)" }}>
+          <Sparkles className="h-4 w-4 text-white" />
         </div>
-        <h2 className="text-3xl font-bold font-display tracking-tight text-foreground">
-          Create your account
-        </h2>
-        <p className="text-muted-foreground text-sm">
-          Set up your account to access your membership.
-        </p>
+        <span className="text-[15px] font-semibold font-display" style={{ color: "#f5ede6" }}>
+          Serene Studio
+        </span>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {/* Header */}
+      <div className="space-y-1">
+        <h2
+          className="text-[22px] font-bold font-display tracking-tight"
+          style={{ color: "#f5ede6", letterSpacing: "-0.020em" }}
+        >
+          Create your account
+        </h2>
+        <p className="text-sm" style={{ color: "#7a7068" }}>
+          Set up your member account in seconds
+        </p>
+        <div style={{ height: "1px", marginTop: "10px", background: "linear-gradient(to right, rgba(198,161,91,0.20), rgba(255,255,255,0.04) 60%, transparent)" }} />
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Full Name */}
         <div className="space-y-1.5">
-          <Label htmlFor="name">Full Name</Label>
-          <Input id="name" placeholder="Your full name" {...register("name")} />
-          {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+          <Label htmlFor="name" style={{ color: "#9a9088", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>
+            Full Name
+          </Label>
+          <input
+            id="name"
+            type="text"
+            placeholder="Your full name"
+            autoComplete="name"
+            {...nameReg}
+            onFocus={() => setFocusedField("name")}
+            onBlur={(e) => { nameReg.onBlur(e); setFocusedField(null); }}
+            style={inputStyle("name", !!errors.name)}
+          />
+          {errors.name && <p className="text-xs" style={{ color: "rgba(248,113,113,0.90)" }}>{errors.name.message}</p>}
         </div>
 
+        {/* Email */}
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email Address</Label>
-          <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
-          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+          <Label htmlFor="email" style={{ color: "#9a9088", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>
+            Email Address
+          </Label>
+          <input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            {...emailReg}
+            onFocus={() => setFocusedField("email")}
+            onBlur={(e) => { emailReg.onBlur(e); setFocusedField(null); }}
+            style={inputStyle("email", !!errors.email)}
+          />
+          {errors.email && <p className="text-xs" style={{ color: "rgba(248,113,113,0.90)" }}>{errors.email.message}</p>}
         </div>
 
+        {/* Password */}
         <div className="space-y-1.5">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" placeholder="At least 8 characters" {...register("password")} />
-          {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+          <Label htmlFor="password" style={{ color: "#9a9088", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>
+            Password
+          </Label>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="At least 8 characters"
+              autoComplete="new-password"
+              {...passReg}
+              onFocus={() => setFocusedField("password")}
+              onBlur={(e) => { passReg.onBlur(e); setFocusedField(null); }}
+              style={inputStyle("password", !!errors.password)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors duration-150"
+              style={{ color: "#5e5650" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#cbbfb6")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#5e5650")}
+            >
+              {showPassword ? <EyeOff className="h-[15px] w-[15px]" /> : <Eye className="h-[15px] w-[15px]" />}
+            </button>
+          </div>
+          {errors.password && <p className="text-xs" style={{ color: "rgba(248,113,113,0.90)" }}>{errors.password.message}</p>}
         </div>
 
+        {/* Confirm Password */}
         <div className="space-y-1.5">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input id="confirmPassword" type="password" placeholder="Repeat your password" {...register("confirmPassword")} />
+          <Label htmlFor="confirmPassword" style={{ color: "#9a9088", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>
+            Confirm Password
+          </Label>
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              type={showConfirm ? "text" : "password"}
+              placeholder="Repeat your password"
+              autoComplete="new-password"
+              {...confirmReg}
+              onFocus={() => setFocusedField("confirmPassword")}
+              onBlur={(e) => { confirmReg.onBlur(e); setFocusedField(null); }}
+              style={inputStyle("confirmPassword", !!errors.confirmPassword)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors duration-150"
+              style={{ color: "#5e5650" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#cbbfb6")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#5e5650")}
+            >
+              {showConfirm ? <EyeOff className="h-[15px] w-[15px]" /> : <Eye className="h-[15px] w-[15px]" />}
+            </button>
+          </div>
           {errors.confirmPassword && (
-            <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+            <p className="text-xs" style={{ color: "rgba(248,113,113,0.90)" }}>{errors.confirmPassword.message}</p>
           )}
         </div>
 
-        <Button type="submit" className="w-full h-11 text-base gap-2" loading={loading}>
-          Create Account
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        {/* CTA */}
+        <div className="pt-1">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-12 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.985] disabled:opacity-55 disabled:cursor-not-allowed"
+            style={{
+              background: "linear-gradient(160deg, #b3173a 0%, #8c1022 55%, #640a1a 100%)",
+              color: "#f5ede6",
+              letterSpacing: "0.015em",
+              boxShadow: "0 4px 22px rgba(161,18,47,0.32), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.18)",
+            }}
+            onMouseEnter={e => {
+              if (!loading) {
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = "translateY(-1px)";
+                el.style.boxShadow = "0 8px 30px rgba(161,18,47,0.45), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.18)";
+                el.style.background = "linear-gradient(160deg, #c61d40 0%, #9e122a 55%, #74101e 100%)";
+              }
+            }}
+            onMouseLeave={e => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.transform = "";
+              el.style.boxShadow = "0 4px 22px rgba(161,18,47,0.32), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.18)";
+              el.style.background = "linear-gradient(160deg, #b3173a 0%, #8c1022 55%, #640a1a 100%)";
+            }}
+          >
+            {loading ? (
+              <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+            ) : (
+              <>Create Account <ArrowRight className="h-4 w-4" /></>
+            )}
+          </button>
+        </div>
       </form>
 
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-center text-xs pt-1" style={{ color: "#5e5650" }}>
         Already have an account?{" "}
         <a
-          href={`/login${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
-          className="text-primary hover:underline font-medium"
+          href={loginUrl}
+          className="font-semibold transition-colors duration-150"
+          style={{ color: "#c6a15b" }}
+          onMouseEnter={e => (e.currentTarget.style.color = "#e4c478")}
+          onMouseLeave={e => (e.currentTarget.style.color = "#c6a15b")}
         >
           Sign in
         </a>
@@ -137,14 +279,47 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 bg-background">
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold-100/40 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-mocha-100/30 blur-3xl" />
+    <div className="min-h-screen flex items-center justify-center p-6 sm:p-10 relative overflow-hidden" style={{ background: "#070507" }}>
+
+      {/* Background image — same as login, faded further */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div style={{ position: "absolute", inset: "-3%", filter: "blur(1.5px)" }}>
+          <Image
+            src="/uploads/pexels-beyond-this-65211058-8393716.jpg"
+            alt=""
+            fill
+            priority
+            style={{ objectFit: "cover", objectPosition: "60% center", opacity: 0.28 }}
+          />
+        </div>
+        {/* Strong overlay — this is a form-focused page */}
+        <div style={{ position: "absolute", inset: 0, background: "rgba(7,5,7,0.82)" }} />
+        {/* Ambient glows */}
+        <div style={{ position: "absolute", top: "-15%", right: "-8%", width: "560px", height: "560px", background: "radial-gradient(circle, rgba(161,18,47,0.14) 0%, transparent 65%)", borderRadius: "50%" }} />
+        <div style={{ position: "absolute", bottom: "-15%", left: "-5%", width: "480px", height: "480px", background: "radial-gradient(circle, rgba(161,18,47,0.08) 0%, transparent 65%)", borderRadius: "50%" }} />
+        {/* Grain */}
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
+          opacity: 0.022, mixBlendMode: "overlay",
+        }} />
       </div>
-      <Suspense>
-        <SignupForm />
-      </Suspense>
+
+      {/* Card */}
+      <div
+        className="w-full max-w-[420px] rounded-2xl p-8 sm:p-10 animate-fade-in relative z-10"
+        style={{
+          background: "rgba(9,5,7,0.90)",
+          backdropFilter: "blur(44px)",
+          WebkitBackdropFilter: "blur(44px)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          boxShadow: "0 40px 100px rgba(0,0,0,0.72), 0 0 0 1px rgba(161,18,47,0.07), inset 0 1px 0 rgba(255,255,255,0.05)",
+        }}
+      >
+        <Suspense>
+          <SignupForm />
+        </Suspense>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import type React from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
@@ -25,22 +26,27 @@ interface Plan {
 
 type FlowStep = "plan" | "confirm";
 
-const planGradients = {
-  Normal: "from-stone-100 to-stone-50 border-stone-200",
-  VIP: "from-mocha-50 to-sand-100 border-mocha-200",
-  Premium: "from-gold-50 via-sand-50 to-white border-gold-300",
+const planCardBase: React.CSSProperties = {
+  background: "linear-gradient(145deg, #181312 0%, #1e1614 100%)",
+  boxShadow: "0 4px 28px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.35)",
 };
 
-const planSelectedRings = {
-  Normal: "ring-stone-400",
-  VIP: "ring-mocha-500",
-  Premium: "ring-gold-500",
+const planCardBorders: Record<string, string> = {
+  Normal:  "1px solid rgba(255,255,255,0.07)",
+  VIP:     "1px solid rgba(122,12,28,0.22)",
+  Premium: "1px solid rgba(212,175,55,0.20)",
 };
 
-const planCheckColors = {
-  Normal: "bg-stone-500",
-  VIP: "bg-mocha-600",
-  Premium: "bg-gold-500",
+const planSelectedStyles: Record<string, React.CSSProperties> = {
+  Normal:  { border: "1px solid rgba(255,255,255,0.20)", boxShadow: "0 0 0 3px rgba(255,255,255,0.05), 0 16px 48px rgba(0,0,0,0.70)" },
+  VIP:     { border: "1px solid rgba(177,18,38,0.55)",   boxShadow: "0 0 0 3px rgba(177,18,38,0.10), 0 16px 48px rgba(0,0,0,0.70), 0 0 28px rgba(177,18,38,0.12)" },
+  Premium: { border: "1px solid rgba(212,175,55,0.65)",  boxShadow: "0 0 0 3px rgba(212,175,55,0.14), 0 16px 48px rgba(0,0,0,0.70), 0 0 32px rgba(212,175,55,0.12)" },
+};
+
+const planIconStyles: Record<string, React.CSSProperties> = {
+  Normal:  { background: "rgba(40,35,32,0.90)",  color: "#cbbfb6" },
+  VIP:     { background: "rgba(122,12,28,0.30)",  color: "#f0b8c0" },
+  Premium: { background: "rgba(180,140,20,0.22)", color: "#d4af37" },
 };
 
 const planIcons = { Normal: Star, VIP: Crown, Premium: Sparkles };
@@ -159,27 +165,31 @@ function PaymentContent() {
   return (
     <div className="min-h-screen bg-background">
       {/* Ambient background */}
-      <div className="fixed inset-0 -z-10 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-gold-100/40 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-mocha-100/30 blur-3xl" />
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <div style={{ position: "absolute", top: "-10%", left: "15%", width: "500px", height: "500px", background: "radial-gradient(circle, rgba(161,18,47,0.16) 0%, transparent 65%)", borderRadius: "50%" }} />
+        <div style={{ position: "absolute", bottom: "-10%", right: "15%", width: "440px", height: "440px", background: "radial-gradient(circle, rgba(161,18,47,0.10) 0%, transparent 65%)", borderRadius: "50%" }} />
+        <div style={{ position: "absolute", top: "40%", right: "5%", width: "280px", height: "280px", background: "radial-gradient(circle, rgba(198,161,91,0.07) 0%, transparent 65%)", borderRadius: "50%" }} />
       </div>
 
       {/* Header */}
-      <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="sticky top-0 z-10 backdrop-blur-md border-b" style={{ background: "rgba(10,8,8,0.85)", borderColor: "rgba(255,255,255,0.07)" }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-mocha-500 to-gold-500 shadow-soft">
+            <div className="p-2 rounded-xl" style={{ background: "linear-gradient(135deg, #a1122f, #c6293e)", boxShadow: "0 0 16px rgba(161,18,47,0.38)" }}>
               <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <span className="font-semibold font-display text-foreground">Serene Studio</span>
+            <span className="font-semibold font-display" style={{ color: "#f5ede6" }}>Serene Studio</span>
           </Link>
           {authStatus === "unauthenticated" && (
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            <Link href="/login" className="text-sm transition-colors" style={{ color: "#8a7f78" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#c6a15b")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#8a7f78")}
+            >
               Already a member? Sign in
             </Link>
           )}
           {authStatus === "authenticated" && session?.user?.email && (
-            <span className="text-sm text-muted-foreground">{session.user.email}</span>
+            <span className="text-sm" style={{ color: "#8a7f78" }}>{session.user.email}</span>
           )}
         </div>
       </header>
@@ -203,67 +213,69 @@ function PaymentContent() {
             {/* Plan Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {plansLoading && [0, 1, 2].map((i) => (
-                <div key={i} className="rounded-2xl border border-border bg-muted/30 h-72 animate-pulse" />
+                <div key={i} className="rounded-2xl h-72" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", animation: "pulse 2s infinite" }} />
               ))}
               {plans.map((plan) => {
                 const Icon = planIcons[plan.name as keyof typeof planIcons] || Star;
                 const isSelected = selectedPlan?.id === plan.id;
                 const features: string[] = (() => { try { return JSON.parse(plan.features || "[]"); } catch { return []; } })();
-                const ring = planSelectedRings[plan.name as keyof typeof planSelectedRings] || "ring-primary";
-                const checkBg = planCheckColors[plan.name as keyof typeof planCheckColors] || "bg-primary";
+                const iconStyle = planIconStyles[plan.name as keyof typeof planIconStyles] || planIconStyles.Normal;
+
+                const cardStyle: React.CSSProperties = isSelected
+                  ? { ...planCardBase, ...planSelectedStyles[plan.name as keyof typeof planSelectedStyles], transform: "scale(1.02)" }
+                  : { ...planCardBase, border: planCardBorders[plan.name as keyof typeof planCardBorders] || "1px solid rgba(160,130,100,0.22)" };
 
                 return (
                   <div
                     key={plan.id}
                     onClick={() => setSelectedPlan(plan)}
-                    className={`relative rounded-2xl border-2 bg-gradient-to-br p-6 cursor-pointer transition-all duration-300 ${
-                      planGradients[plan.name as keyof typeof planGradients] || "from-card to-muted border-border"
-                    } ${
-                      isSelected
-                        ? `ring-2 ${ring} ring-offset-2 scale-[1.02]`
-                        : "hover:scale-[1.01] hover:shadow-card"
-                    }`}
-                    style={{ boxShadow: isSelected ? "var(--shadow-card-hover)" : undefined }}
+                    className="relative rounded-2xl p-6 cursor-pointer transition-all duration-300"
+                    style={cardStyle}
+                    onMouseEnter={e => {
+                      if (!isSelected) (e.currentTarget as HTMLElement).style.transform = "scale(1.01)";
+                    }}
+                    onMouseLeave={e => {
+                      if (!isSelected) (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                    }}
                   >
                     {plan.isPopular && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-gold-400 to-gold-600 text-white shadow-sm whitespace-nowrap">
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
+                          style={{ background: "linear-gradient(135deg, #9a7a1a 0%, #d4af37 100%)", color: "#1e1210", boxShadow: "0 2px 10px rgba(198,161,91,0.30)" }}>
                           Best Value
                         </span>
                       </div>
                     )}
 
                     {isSelected && (
-                      <div className={`absolute top-3 right-3 h-6 w-6 rounded-full ${checkBg} flex items-center justify-center shadow-soft`}>
-                        <Check className="h-3.5 w-3.5 text-white" />
+                      <div className="absolute top-3 right-3 h-6 w-6 rounded-full flex items-center justify-center"
+                        style={{ background: "linear-gradient(135deg, #9a7a1a, #c6a15b)", boxShadow: "0 2px 8px rgba(198,161,91,0.40)" }}>
+                        <Check className="h-3.5 w-3.5" style={{ color: "#1e1210" }} />
                       </div>
                     )}
 
-                    <div className={`p-3 rounded-xl inline-flex mb-4 ${
-                      plan.level === 3 ? "bg-gold-100" : plan.level === 2 ? "bg-mocha-100" : "bg-stone-100"
-                    }`}>
-                      <Icon className={`h-5 w-5 ${
-                        plan.level === 3 ? "text-gold-600" : plan.level === 2 ? "text-mocha-600" : "text-stone-600"
-                      }`} />
+                    <div className="p-3 rounded-xl inline-flex mb-4" style={iconStyle}>
+                      <Icon className="h-5 w-5" />
                     </div>
 
-                    <h3 className="text-lg font-bold font-display text-foreground mb-1">{plan.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{plan.description}</p>
+                    <h3 className="text-lg font-bold font-display mb-1" style={{ color: "#f5ede6", letterSpacing: "-0.015em" }}>{plan.name}</h3>
+                    <p className="text-sm mb-4 leading-relaxed" style={{ color: "rgba(203,191,182,0.65)" }}>{plan.description}</p>
 
                     <div className="flex items-baseline gap-1 mb-5">
-                      <span className="text-3xl font-bold font-display text-foreground">
+                      <span className="text-3xl font-bold font-display tabular-nums" style={{ color: "#f5ede6", letterSpacing: "-0.022em" }}>
                         {formatCurrency(plan.price)}
                       </span>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm" style={{ color: "#8a7f78" }}>
                         /{plan.billingCycle.toLowerCase()}
                       </span>
                     </div>
 
                     <ul className="space-y-2">
                       {features.map((f, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                          <div className="mt-0.5 h-4 w-4 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                            <Check className="h-2.5 w-2.5 text-emerald-600" />
+                        <li key={i} className="flex items-start gap-2 text-sm" style={{ color: "rgba(245,237,230,0.75)" }}>
+                          <div className="mt-0.5 h-4 w-4 rounded-full flex items-center justify-center shrink-0"
+                            style={{ background: "rgba(10,80,45,0.30)" }}>
+                            <Check className="h-2.5 w-2.5" style={{ color: "#4ade80" }} />
                           </div>
                           {f}
                         </li>
@@ -312,10 +324,10 @@ function PaymentContent() {
                 {HOW_IT_WORKS.map((item, i) => (
                   <div key={i} className="relative flex flex-col items-center text-center gap-3 p-4">
                     {i < HOW_IT_WORKS.length - 1 && (
-                      <div className="hidden md:block absolute top-7 left-[calc(50%+20px)] right-0 h-px bg-border" />
+                      <div className="hidden md:block absolute top-7 left-[calc(50%+20px)] right-0 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
                     )}
-                    <div className="relative z-10 h-10 w-10 rounded-full bg-card border border-border flex items-center justify-center shadow-soft">
-                      <span className="text-sm font-bold font-display text-primary">{item.step}</span>
+                    <div className="relative z-10 h-10 w-10 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", boxShadow: "0 2px 8px rgba(0,0,0,0.30)" }}>
+                      <span className="text-sm font-bold font-display" style={{ color: "#c6a15b" }}>{item.step}</span>
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-foreground">{item.title}</p>
@@ -328,11 +340,11 @@ function PaymentContent() {
 
             {/* ── Trust row ── */}
             <section className="max-w-3xl mx-auto">
-              <div className="rounded-2xl border border-border bg-card/60 px-6 py-4">
+              <div className="rounded-2xl px-6 py-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {TRUST_POINTS.map(({ icon: Icon, label }) => (
                     <div key={label} className="flex items-center gap-2.5">
-                      <div className="p-1.5 rounded-lg bg-primary/8 text-primary shrink-0">
+                      <div className="p-1.5 rounded-lg shrink-0" style={{ background: "rgba(161,18,47,0.18)", color: "#e8a0a8" }}>
                         <Icon className="h-3.5 w-3.5" />
                       </div>
                       <span className="text-xs text-muted-foreground leading-snug">{label}</span>
@@ -351,9 +363,12 @@ function PaymentContent() {
                 {FAQ_ITEMS.map((item, i) => {
                   const isOpen = openFaq === i;
                   return (
-                    <div key={i} className="rounded-xl border border-border bg-card overflow-hidden">
+                    <div key={i} className="rounded-xl overflow-hidden" style={{ background: "#181312", border: "1px solid rgba(255,255,255,0.07)" }}>
                       <button
-                        className="w-full flex items-center justify-between px-5 py-4 text-left gap-4 hover:bg-muted/30 transition-colors"
+                        className="w-full flex items-center justify-between px-5 py-4 text-left gap-4 transition-colors"
+                        style={{ background: "transparent" }}
+                        onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                         onClick={() => setOpenFaq(isOpen ? null : i)}
                       >
                         <span className="text-sm font-medium text-foreground">{item.q}</span>

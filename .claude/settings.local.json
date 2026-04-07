@@ -10,7 +10,11 @@
       "Bash(npm install:*)",
       "Bash(node -e \"require\\(''stripe''\\); console.log\\(''stripe ok'', require\\(''./node_modules/stripe/package.json''\\).version\\)\")",
       "Bash(node -e \":*)",
-      "Bash(ls -la \"c:/Users/osmar/Desktop/Massage/node_modules/.prisma/client/\"*.tmp*)"
+      "Bash(ls -la \"c:/Users/osmar/Desktop/Massage/node_modules/.prisma/client/\"*.tmp*)",
+      "Bash(xargs grep:*)",
+      "Read(//c/Users/osmar/AppData/Local/Temp/claude/c--Users-osmar-Desktop-Massage/e28940de-c0a9-44e4-9b87-3069eb2ba207/tasks/**)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:SerenaRenan123%40@db.abgidadjwxefsdgovrrl.supabase.co:5432/postgres?sslmode=require\" npx prisma db push --skip-generate)"
     ],
     "additionalDirectories": [
       "c:\\Users\\osmar\\Desktop\\Massage\\app\\admin",

@@ -16,7 +16,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MembershipBadge } from "@/components/shared/MembershipBadge";
 import { FileUploadField } from "@/components/content/FileUploadField";
-import { CheckSquare, Square, X, Upload, Images, FileText } from "lucide-react";
+import { CoverCropper } from "@/components/content/CoverCropper";
+import { CheckSquare, Square, X, Upload, Images, FileText, Crop } from "lucide-react";
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -104,6 +105,11 @@ export function ContentDialog({ open, onClose, content, album, onSaved }: Conten
   const [plans, setPlans] = useState<any[]>([]);
   const [selectedPlanIds, setSelectedPlanIds] = useState<string[]>([]);
 
+  // Cover crop state — tracked separately from the form so we always crop
+  // from the original uploaded image, not from a previously-cropped version.
+  const [originalThumbUrl, setOriginalThumbUrl] = useState("");
+  const [showCropper, setShowCropper] = useState(false);
+
   // ── Content form ──────────────────────────────────────────────────────────
 
   const contentForm = useForm<ContentFormData>({
@@ -183,6 +189,11 @@ export function ContentDialog({ open, onClose, content, album, onSaved }: Conten
 
     setNewItemUrl("");
     setNewItemCaption("");
+    setShowCropper(false);
+    // Seed the original thumb so admins can re-crop from the uploaded source
+    if (isEditingContent) setOriginalThumbUrl(content.thumbnailUrl || "");
+    else if (isEditingAlbum) setOriginalThumbUrl(album.coverImageUrl || "");
+    else setOriginalThumbUrl("");
   }, [open, content, album, isEditingContent, isEditingAlbum]);
 
   const fetchPlans = async () => {
@@ -496,14 +507,73 @@ export function ContentDialog({ open, onClose, content, album, onSaved }: Conten
                 </div>
               )}
 
-              {/* Thumbnail URL / Upload */}
-              <FileUploadField
-                label="Thumbnail / Cover Image"
-                value={watchC("thumbnailUrl") || ""}
-                onChange={(url) => setC("thumbnailUrl", url)}
-                accept="image/*"
-                placeholder="https://..."
-              />
+              {/* Thumbnail / Cover Image + optional crop editor */}
+              {showCropper && originalThumbUrl ? (
+                <CoverCropper
+                  src={originalThumbUrl}
+                  onApply={(croppedUrl) => {
+                    setC("thumbnailUrl", croppedUrl);
+                    setShowCropper(false);
+                  }}
+                  onCancel={() => setShowCropper(false)}
+                />
+              ) : (
+                <div className="space-y-2">
+                  <FileUploadField
+                    label="Thumbnail / Cover Image"
+                    value={watchC("thumbnailUrl") || ""}
+                    onChange={(url) => {
+                      setC("thumbnailUrl", url);
+                      // Track original for re-cropping
+                      if (url && isImageUrl(url)) {
+                        setOriginalThumbUrl(url);
+                        setShowCropper(false);
+                      }
+                    }}
+                    accept="image/*"
+                    placeholder="https://..."
+                  />
+                  {watchC("thumbnailUrl") && isImageUrl(watchC("thumbnailUrl") || "") && (
+                    <div
+                      className="flex items-center justify-between px-3 py-2.5 rounded-xl border"
+                      style={{ background: "rgba(122,12,28,0.08)", borderColor: "rgba(122,12,28,0.22)" }}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={watchC("thumbnailUrl") || ""}
+                          alt="Cover preview"
+                          className="h-10 rounded-md object-cover"
+                          style={{ width: "32px" /* 4:5 ratio */ }}
+                        />
+                        <div>
+                          <p className="text-[11px] font-semibold" style={{ color: "#f5ede6" }}>
+                            Cover image set
+                          </p>
+                          <p className="text-[10px]" style={{ color: "#8a7f78" }}>
+                            Click to adjust how it's cropped in cards
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Always crop from the original, not the already-cropped thumb
+                          if (originalThumbUrl) setShowCropper(true);
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all hover:brightness-[1.20]"
+                        style={{
+                          background: "linear-gradient(135deg, #7a0c1c, #b11226)",
+                          color: "#f5ede6",
+                        }}
+                      >
+                        <Crop className="h-3 w-3" />
+                        Adjust Crop
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-1.5">
                 <Label>Publish Date</Label>
@@ -562,14 +632,69 @@ export function ContentDialog({ open, onClose, content, album, onSaved }: Conten
                 </div>
               </div>
 
-              {/* Cover image */}
-              <FileUploadField
-                label="Cover Image"
-                value={watchA("coverImageUrl") || ""}
-                onChange={(url) => setA("coverImageUrl", url)}
-                accept="image/*"
-                placeholder="https://..."
-              />
+              {/* Album cover image + crop editor */}
+              {showCropper && originalThumbUrl ? (
+                <CoverCropper
+                  src={originalThumbUrl}
+                  onApply={(croppedUrl) => {
+                    setA("coverImageUrl", croppedUrl);
+                    setShowCropper(false);
+                  }}
+                  onCancel={() => setShowCropper(false)}
+                />
+              ) : (
+                <div className="space-y-2">
+                  <FileUploadField
+                    label="Cover Image"
+                    value={watchA("coverImageUrl") || ""}
+                    onChange={(url) => {
+                      setA("coverImageUrl", url);
+                      if (url && isImageUrl(url)) {
+                        setOriginalThumbUrl(url);
+                        setShowCropper(false);
+                      }
+                    }}
+                    accept="image/*"
+                    placeholder="https://..."
+                  />
+                  {watchA("coverImageUrl") && isImageUrl(watchA("coverImageUrl") || "") && (
+                    <div
+                      className="flex items-center justify-between px-3 py-2.5 rounded-xl border"
+                      style={{ background: "rgba(122,12,28,0.08)", borderColor: "rgba(122,12,28,0.22)" }}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={watchA("coverImageUrl") || ""}
+                          alt="Cover preview"
+                          className="h-10 rounded-md object-cover"
+                          style={{ width: "32px" }}
+                        />
+                        <div>
+                          <p className="text-[11px] font-semibold" style={{ color: "#f5ede6" }}>
+                            Cover image set
+                          </p>
+                          <p className="text-[10px]" style={{ color: "#8a7f78" }}>
+                            Click to adjust how it&apos;s cropped in cards
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { if (originalThumbUrl) setShowCropper(true); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all hover:brightness-[1.20]"
+                        style={{
+                          background: "linear-gradient(135deg, #7a0c1c, #b11226)",
+                          color: "#f5ede6",
+                        }}
+                      >
+                        <Crop className="h-3 w-3" />
+                        Adjust Crop
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Album Items */}
               <div className="space-y-3">

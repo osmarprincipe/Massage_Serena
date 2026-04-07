@@ -86,7 +86,7 @@ export function AdminSidebar() {
       <nav className="flex-1 overflow-y-auto py-4 px-3">
         {navItems.map((section) => (
           <div key={section.section} className="mb-5">
-            <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.1em]" style={{ color: "rgba(138,127,120,0.55)" }}>
+            <p className="px-3 mb-1.5 section-label">
               {section.section}
             </p>
             <div className="space-y-0.5">

@@ -229,7 +229,7 @@ export default function MyMembershipPage() {
 
                 {!isActive && (
                   <Link
-                    href="/payment"
+                    href={`/payment?planId=${plan.id}`}
                     className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-[11px] font-semibold transition-all duration-[250ms] ease-out active:scale-[0.98] hover:brightness-[1.22]"
                     style={{
                       background: "linear-gradient(160deg, #7a0c1c 0%, #5c0815 55%, #3d0510 100%)",

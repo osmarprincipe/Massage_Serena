@@ -57,8 +57,8 @@ export async function POST(req: NextRequest) {
       payment_method_types: ["card"],
       line_items: [{ price: content.stripePriceId, quantity: 1 }],
       customer_email: userEmail,
-      metadata: { contentId: content.id },
-      success_url: `${appUrl}/app/content?purchased=1`,
+      metadata: { contentId: content.id, userId },
+      success_url: `${appUrl}/app/content?purchased=1&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/app/content`,
     });
   } catch (err) {

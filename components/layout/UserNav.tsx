@@ -37,7 +37,7 @@ export function UserNav() {
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 flex-col w-[240px] border-r"
-        style={{ background: "#0f0b0a", borderColor: "rgba(255,255,255,0.05)" }}>
+        style={{ background: "#0c090a", borderColor: "rgba(255,255,255,0.055)" }}>
         {/* Logo */}
         <div className="flex items-center gap-3 px-6 py-5 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <div className="p-2 rounded-xl" style={{ background: "linear-gradient(135deg, #7a0c1c 0%, #b11226 100%)", boxShadow: "0 2px 14px rgba(177,18,38,0.40)" }}>
