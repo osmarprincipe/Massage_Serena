@@ -14,7 +14,9 @@
       "Bash(xargs grep:*)",
       "Read(//c/Users/osmar/AppData/Local/Temp/claude/c--Users-osmar-Desktop-Massage/e28940de-c0a9-44e4-9b87-3069eb2ba207/tasks/**)",
       "Bash(taskkill /F /IM node.exe)",
-      "Bash(DATABASE_URL=\"postgresql://postgres:SerenaRenan123%40@db.abgidadjwxefsdgovrrl.supabase.co:5432/postgres?sslmode=require\" npx prisma db push --skip-generate)"
+      "Bash(DATABASE_URL=\"postgresql://postgres:SerenaRenan123%40@db.abgidadjwxefsdgovrrl.supabase.co:5432/postgres?sslmode=require\" npx prisma db push --skip-generate)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"spa luxury dark crm mobile responsive navigation drawer\" --domain ux -n 8)",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"spa luxury dark crm mobile responsive navigation drawer\" --domain ux -n 8)"
     ],
     "additionalDirectories": [
       "c:\\Users\\osmar\\Desktop\\Massage\\app\\admin",

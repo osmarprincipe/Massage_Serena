@@ -62,10 +62,14 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    /* Prevent horizontal overflow blowout on mobile */
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-foreground;
+    /* Prevent horizontal scroll globally */
+    overflow-x: hidden;
     font-family: var(--font-inter), system-ui, sans-serif;
     font-feature-settings: "cv11", "ss01", "rlig" 1, "calt" 1;
     font-size: 0.9375rem;

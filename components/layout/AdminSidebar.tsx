@@ -16,6 +16,7 @@ import {
   LogOut,
   Sparkles,
   Shield,
+  X,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -57,38 +58,74 @@ const navItems = [
   },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex flex-col w-[260px] border-r"
-      style={{ background: "#0f0b0a", borderColor: "rgba(255,255,255,0.05)" }}>
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-        <div className="p-2 rounded-xl" style={{ background: "linear-gradient(135deg, #7a0c1c 0%, #b11226 100%)", boxShadow: "0 2px 14px rgba(177,18,38,0.40)" }}>
-          <Sparkles className="h-4 w-4 text-white" />
-        </div>
-        <div>
-          <h1 className="text-[15px] font-bold font-display tracking-tight text-stone-100 leading-none">
-            Serene Studio
-          </h1>
-          <div className="flex items-center gap-1 mt-1">
-            <Shield className="h-2.5 w-2.5" style={{ color: "rgba(232,160,168,0.70)" }} />
-            <p className="text-[10px] uppercase tracking-[0.1em] font-semibold" style={{ color: "rgba(232,160,168,0.70)" }}>
-              Admin Portal
-            </p>
+    <aside
+      className={cn(
+        // Base: fixed full-height panel
+        "fixed inset-y-0 left-0 z-40 flex flex-col w-[260px] border-r",
+        // Slide animation — mobile hidden by default, desktop always visible
+        "transition-transform duration-300 ease-in-out",
+        "lg:translate-x-0",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}
+      style={{ background: "#0f0b0a", borderColor: "rgba(255,255,255,0.05)" }}
+      aria-hidden={!isOpen && undefined}
+    >
+      {/* ── Logo ── */}
+      <div
+        className="flex items-center justify-between px-6 py-5 border-b"
+        style={{ borderColor: "rgba(255,255,255,0.06)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="p-2 rounded-xl shrink-0"
+            style={{
+              background: "linear-gradient(135deg, #7a0c1c 0%, #b11226 100%)",
+              boxShadow: "0 2px 14px rgba(177,18,38,0.40)",
+            }}
+          >
+            <Sparkles className="h-4 w-4 text-white" />
+          </div>
+          <div>
+            <h1 className="text-[15px] font-bold font-display tracking-tight text-stone-100 leading-none">
+              Serene Studio
+            </h1>
+            <div className="flex items-center gap-1 mt-1">
+              <Shield className="h-2.5 w-2.5" style={{ color: "rgba(232,160,168,0.70)" }} />
+              <p
+                className="text-[10px] uppercase tracking-[0.1em] font-semibold"
+                style={{ color: "rgba(232,160,168,0.70)" }}
+              >
+                Admin Portal
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* Close button — mobile only */}
+        <button
+          className="lg:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition-all"
+          onClick={onClose}
+          aria-label="Close navigation"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
-      {/* Navigation */}
+      {/* ── Navigation ── */}
       <nav className="flex-1 overflow-y-auto py-4 px-3">
         {navItems.map((section) => (
           <div key={section.section} className="mb-5">
-            <p className="px-3 mb-1.5 section-label">
-              {section.section}
-            </p>
+            <p className="px-3 mb-1.5 section-label">{section.section}</p>
             <div className="space-y-0.5">
               {section.items.map((item) => {
                 const Icon = item.icon;
@@ -100,28 +137,44 @@ export function AdminSidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={onClose}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 font-medium",
-                      isActive
-                        ? "font-semibold"
-                        : "hover:bg-white/[0.06]"
+                      isActive ? "font-semibold" : "hover:bg-white/[0.06]"
                     )}
-                    style={isActive ? {
-                      background: "linear-gradient(135deg, rgba(122,12,28,0.22) 0%, rgba(122,12,28,0.08) 100%)",
-                      borderLeft: "2px solid #b11226",
-                      paddingLeft: "10px",
-                      color: "#e8a0a8",
-                    } : { color: "#8a7f78" }}
-                    onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "#f5ede6"; }}
-                    onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "#8a7f78"; }}
+                    style={
+                      isActive
+                        ? {
+                            background:
+                              "linear-gradient(135deg, rgba(122,12,28,0.22) 0%, rgba(122,12,28,0.08) 100%)",
+                            borderLeft: "2px solid #b11226",
+                            paddingLeft: "10px",
+                            color: "#e8a0a8",
+                          }
+                        : { color: "#8a7f78" }
+                    }
+                    onMouseEnter={(e) => {
+                      if (!isActive)
+                        (e.currentTarget as HTMLElement).style.color = "#f5ede6";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive)
+                        (e.currentTarget as HTMLElement).style.color = "#8a7f78";
+                    }}
                   >
                     <Icon
                       className="h-4 w-4 shrink-0"
-                      style={{ color: isActive ? "#e8a0a8" : undefined, opacity: isActive ? 1 : 0.7 }}
+                      style={{
+                        color: isActive ? "#e8a0a8" : undefined,
+                        opacity: isActive ? 1 : 0.7,
+                      }}
                     />
                     <span className="truncate">{item.label}</span>
                     {isActive && (
-                      <div className="ml-auto h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "#b11226" }} />
+                      <div
+                        className="ml-auto h-1.5 w-1.5 rounded-full shrink-0"
+                        style={{ background: "#b11226" }}
+                      />
                     )}
                   </Link>
                 );
@@ -131,15 +184,23 @@ export function AdminSidebar() {
         ))}
       </nav>
 
-      {/* User */}
+      {/* ── User footer ── */}
       <div className="p-4 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-        <div className="flex items-center gap-3 p-2.5 rounded-xl transition-colors group cursor-default"
+        <div
+          className="flex items-center gap-3 p-2.5 rounded-xl transition-colors group cursor-default"
           style={{ background: "transparent" }}
-          onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
-          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+          onMouseEnter={(e) =>
+            ((e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)")
+          }
+          onMouseLeave={(e) =>
+            ((e.currentTarget as HTMLElement).style.background = "transparent")
+          }
         >
           <Avatar className="h-8 w-8 shrink-0">
-            <AvatarFallback className="text-xs" style={{ background: "rgba(122,12,28,0.35)", color: "#e8a0a8" }}>
+            <AvatarFallback
+              className="text-xs"
+              style={{ background: "rgba(122,12,28,0.35)", color: "#e8a0a8" }}
+            >
               {getInitials(session?.user?.name || session?.user?.email || "A")}
             </AvatarFallback>
           </Avatar>
@@ -147,14 +208,22 @@ export function AdminSidebar() {
             <p className="text-sm font-semibold truncate leading-tight text-stone-100">
               {session?.user?.name || "Admin"}
             </p>
-            <p className="text-[11px] truncate mt-0.5" style={{ color: "#8a7f78" }}>{session?.user?.email}</p>
+            <p className="text-[11px] truncate mt-0.5" style={{ color: "#8a7f78" }}>
+              {session?.user?.email}
+            </p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg"
             style={{ color: "#8a7f78" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#f5ede6"; (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#8a7f78"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.color = "#f5ede6";
+              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.color = "#8a7f78";
+              (e.currentTarget as HTMLElement).style.background = "transparent";
+            }}
             title="Sign out"
           >
             <LogOut className="h-3.5 w-3.5" />
