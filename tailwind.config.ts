@@ -157,6 +157,10 @@ const config: Config = {
           from: { opacity: "0", transform: "scale(0.95)" },
           to: { opacity: "1", transform: "scale(1)" },
         },
+        "video-breathe": {
+          "0%, 100%": { opacity: "0.58" },
+          "50%":      { opacity: "0.50" },
+        },
       },
       animation: {
         "accordion-down":  "accordion-down 0.2s ease-out",
@@ -165,6 +169,7 @@ const config: Config = {
         "slide-in-right":  "slide-in-right 0.3s ease-out",
         shimmer:           "shimmer 2s infinite",
         "scale-in":        "scale-in 0.2s ease-out both",
+        "video-breathe":   "video-breathe 9s ease-in-out infinite",
       },
       transitionDelay: {
         "0":   "0ms",

@@ -438,6 +438,17 @@
     text-wrap: balance;
   }
 
+  /* ── Login video — slow cinematic breathe ── */
+  .video-bg-breathe {
+    animation: video-breathe 9s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .video-bg-breathe {
+      animation: none !important;
+    }
+  }
+
   .shadow-soft      { box-shadow: var(--shadow-soft); }
   .shadow-card      { box-shadow: var(--shadow-card); }
   .shadow-card-hover{ box-shadow: var(--shadow-card-hover); }
