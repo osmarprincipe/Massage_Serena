@@ -1,16 +1,21 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import type React from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  Sparkles, Check, ArrowRight, Shield, Crown, Star,
+  Sparkles, Check, ArrowRight, Shield,
   Lock, ChevronDown, BadgeCheck, Zap, Mail, UserCheck,
-  CreditCard, CalendarCheck, Loader2,
+  CreditCard, CalendarCheck, Loader2, Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
+import {
+  getPlanTier, getTierIcon,
+  tierCardStyles, tierAccentStyles, tierSelectedStyles,
+} from "@/lib/plan-style";
+import { PlanCardsLayout } from "@/components/memberships/PlanCardsLayout";
 import Link from "next/link";
 
 interface Plan {
@@ -27,33 +32,12 @@ interface Plan {
 type FlowStep = "plan" | "confirm";
 
 const planCardBase: React.CSSProperties = {
-  background: "linear-gradient(145deg, #181312 0%, #1e1614 100%)",
   boxShadow: "0 4px 28px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.35)",
 };
 
-const planCardBorders: Record<string, string> = {
-  Normal:  "1px solid rgba(255,255,255,0.07)",
-  VIP:     "1px solid rgba(122,12,28,0.22)",
-  Premium: "1px solid rgba(212,175,55,0.20)",
-};
-
-const planSelectedStyles: Record<string, React.CSSProperties> = {
-  Normal:  { border: "1px solid rgba(255,255,255,0.20)", boxShadow: "0 0 0 3px rgba(255,255,255,0.05), 0 16px 48px rgba(0,0,0,0.70)" },
-  VIP:     { border: "1px solid rgba(177,18,38,0.55)",   boxShadow: "0 0 0 3px rgba(177,18,38,0.10), 0 16px 48px rgba(0,0,0,0.70), 0 0 28px rgba(177,18,38,0.12)" },
-  Premium: { border: "1px solid rgba(212,175,55,0.65)",  boxShadow: "0 0 0 3px rgba(212,175,55,0.14), 0 16px 48px rgba(0,0,0,0.70), 0 0 32px rgba(212,175,55,0.12)" },
-};
-
-const planIconStyles: Record<string, React.CSSProperties> = {
-  Normal:  { background: "rgba(40,35,32,0.90)",  color: "#cbbfb6" },
-  VIP:     { background: "rgba(122,12,28,0.30)",  color: "#f0b8c0" },
-  Premium: { background: "rgba(180,140,20,0.22)", color: "#d4af37" },
-};
-
-const planIcons = { Normal: Star, VIP: Crown, Premium: Sparkles };
-
 const HOW_IT_WORKS = [
   { icon: Star, step: "1", title: "Choose a plan", desc: "Select the membership that best fits your wellness goals." },
-  { icon: UserCheck, step: "2", title: "Sign in or create account", desc: "Log in or create a free account to continue." },
+  { icon: UserCheck, step: "2", title: "Create your account", desc: "Create a free account to continue — takes only a moment." },
   { icon: CreditCard, step: "3", title: "Complete payment", desc: "Secure checkout — your membership is confirmed instantly." },
   { icon: CalendarCheck, step: "4", title: "Access your membership", desc: "Your member area is unlocked immediately after payment." },
 ];
@@ -93,11 +77,14 @@ function PaymentContent() {
 
   const [plans, setPlans] = useState<Plan[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
+  const maxLevel = plans.length > 0 ? Math.max(...plans.map((p) => p.level)) : 1;
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [step, setStep] = useState<FlowStep>("plan");
   const [loading, setLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  // Prevent auto-confirm from firing more than once per landing
+  const hasAutoConfirmedRef = useRef(false);
 
   // Load plans
   useEffect(() => {
@@ -108,18 +95,31 @@ function PaymentContent() {
       .finally(() => setPlansLoading(false));
   }, []);
 
-  // Auto-select plan from URL ?planId=
+  // Auto-select plan from URL ?planId= (or sessionStorage fallback)
+  // and auto-advance to confirm step when the user returns after auth.
   useEffect(() => {
     if (plans.length === 0) return;
-    const planId = searchParams.get("planId");
+    // Don't re-run once we've already auto-confirmed (guards against
+    // the user pressing "← Back to plans" being overridden by a stale effect).
+    if (hasAutoConfirmedRef.current) return;
+
+    // Primary: URL param. Fallback: sessionStorage (survives browser back nav).
+    let planId = searchParams.get("planId");
+    if (!planId) {
+      try { planId = sessionStorage.getItem("pendingPlanId"); } catch { /* ignore */ }
+    }
     if (!planId) return;
+
     const match = plans.find((p) => p.id === planId);
-    if (match) {
-      setSelectedPlan(match);
-      // If user is already logged in and arrived via the auth redirect, go straight to confirm
-      if (authStatus === "authenticated") {
-        setStep("confirm");
-      }
+    if (!match) return;
+
+    setSelectedPlan(match);
+
+    if (authStatus === "authenticated") {
+      // Clear the sessionStorage backup — plan is now safely in the flow.
+      try { sessionStorage.removeItem("pendingPlanId"); } catch { /* ignore */ }
+      setStep("confirm");
+      hasAutoConfirmedRef.current = true;
     }
   }, [plans, searchParams, authStatus]);
 
@@ -127,9 +127,17 @@ function PaymentContent() {
     if (!selectedPlan) return;
 
     if (authStatus === "unauthenticated") {
-      // Redirect to login, preserving the selected plan
-      const callbackUrl = `/payment?planId=${selectedPlan.id}`;
-      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+      // Persist plan ID in sessionStorage so it survives the auth round-trip
+      // even if the browser strips or modifies URL params.
+      try { sessionStorage.setItem("pendingPlanId", selectedPlan.id); } catch { /* ignore */ }
+
+      // Pass callbackUrl (primary restore mechanism) + plan name (context banner
+      // on the login/signup page so the user knows why they're being asked to auth).
+      const params = new URLSearchParams({
+        callbackUrl: `/payment?planId=${selectedPlan.id}`,
+        plan: selectedPlan.name,
+      });
+      router.push(`/signup?${params}`);
       return;
     }
 
@@ -198,9 +206,9 @@ function PaymentContent() {
 
         {/* ── Step: Plan Selection ─────────────────────────────────────────── */}
         {step === "plan" && (
-          <div className="space-y-10 animate-fade-in">
+          <div className="space-y-14 animate-fade-in">
 
-            <div className="text-center space-y-3 max-w-xl mx-auto">
+            <div className="text-center space-y-5 max-w-xl mx-auto">
               <h1 className="text-4xl font-bold font-display tracking-tight text-foreground">
                 Choose your membership
               </h1>
@@ -211,19 +219,20 @@ function PaymentContent() {
             </div>
 
             {/* Plan Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <PlanCardsLayout count={plansLoading ? 3 : plans.length}>
               {plansLoading && [0, 1, 2].map((i) => (
                 <div key={i} className="rounded-2xl h-72" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", animation: "pulse 2s infinite" }} />
               ))}
               {plans.map((plan) => {
-                const Icon = planIcons[plan.name as keyof typeof planIcons] || Star;
+                const tier = getPlanTier(plan.level, maxLevel);
+                const Icon = getTierIcon(tier);
                 const isSelected = selectedPlan?.id === plan.id;
                 const features: string[] = (() => { try { return JSON.parse(plan.features || "[]"); } catch { return []; } })();
-                const iconStyle = planIconStyles[plan.name as keyof typeof planIconStyles] || planIconStyles.Normal;
+                const iconStyle = tierAccentStyles[tier];
 
                 const cardStyle: React.CSSProperties = isSelected
-                  ? { ...planCardBase, ...planSelectedStyles[plan.name as keyof typeof planSelectedStyles], transform: "scale(1.02)" }
-                  : { ...planCardBase, border: planCardBorders[plan.name as keyof typeof planCardBorders] || "1px solid rgba(160,130,100,0.22)" };
+                  ? { ...planCardBase, ...tierCardStyles[tier], ...tierSelectedStyles[tier], transform: "scale(1.02)" }
+                  : { ...planCardBase, ...tierCardStyles[tier] };
 
                 return (
                   <div
@@ -284,7 +293,7 @@ function PaymentContent() {
                   </div>
                 );
               })}
-            </div>
+            </PlanCardsLayout>
 
             {/* CTA */}
             <div className="flex flex-col items-center gap-3">
@@ -299,7 +308,7 @@ function PaymentContent() {
                 ) : !selectedPlan ? (
                   "Select a plan to continue"
                 ) : authStatus === "unauthenticated" ? (
-                  <><Lock className="h-4 w-4" /> Sign in to continue</>
+                  <><ArrowRight className="h-4 w-4" /> Create account &amp; continue</>
                 ) : (
                   <>{`Continue with ${selectedPlan.name}`}<ArrowRight className="h-4 w-4" /></>
                 )}
@@ -309,7 +318,13 @@ function PaymentContent() {
               )}
               {selectedPlan && authStatus === "unauthenticated" && (
                 <p className="text-xs text-muted-foreground">
-                  You&apos;ll be asked to sign in or create a free account first
+                  Already a member?{" "}
+                  <Link
+                    href={`/login?callbackUrl=${encodeURIComponent(`/payment?planId=${selectedPlan.id}`)}&plan=${encodeURIComponent(selectedPlan.name)}`}
+                    className="underline underline-offset-2 transition-colors hover:text-foreground"
+                  >
+                    Sign in instead
+                  </Link>
                 </p>
               )}
             </div>

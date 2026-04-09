@@ -23,6 +23,8 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  // Plan name hint passed from the payment page — shown as context banner.
+  const pendingPlan = searchParams.get("plan") || null;
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -61,7 +63,11 @@ function LoginForm() {
     }
   };
 
-  const signupUrl = `/signup${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`;
+  const signupParams = new URLSearchParams();
+  if (callbackUrl !== "/") signupParams.set("callbackUrl", callbackUrl);
+  if (pendingPlan) signupParams.set("plan", pendingPlan);
+  const signupQuery = signupParams.toString();
+  const signupUrl = `/signup${signupQuery ? `?${signupQuery}` : ""}`;
 
   const inputStyle = (field: string, hasError: boolean): React.CSSProperties => ({
     width: "100%",
@@ -86,6 +92,24 @@ function LoginForm() {
 
   return (
     <div className="w-full">
+
+      {/* Purchase context banner — shown when arriving from the payment page */}
+      {pendingPlan && (
+        <div
+          className="flex items-center gap-2.5 mb-7 px-3.5 py-2.5 rounded-xl"
+          style={{
+            background: "rgba(122,12,28,0.16)",
+            border: "1px solid rgba(177,18,38,0.22)",
+          }}
+        >
+          <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "#c6a15b" }} />
+          <p className="text-[12px] leading-snug" style={{ color: "rgba(203,191,182,0.70)" }}>
+            Sign in to continue with the{" "}
+            <span className="font-semibold" style={{ color: "#c6a15b" }}>{pendingPlan}</span>
+            {" "}membership
+          </p>
+        </div>
+      )}
 
       {/* Mobile logo */}
       <div className="flex items-center gap-3 lg:hidden mb-8">
@@ -208,7 +232,7 @@ function LoginForm() {
       <p className="mt-9 text-center text-[13px]" style={{ color: "rgba(190,168,158,0.36)" }}>
         New client?{" "}
         <a
-          href={signupUrl}
+          href="/payment"
           className="font-semibold transition-colors duration-150"
           style={{ color: "#c9a44e" }}
           onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#e8c06a")}

@@ -81,7 +81,7 @@ export function MembershipDialog({ open, onClose, user, onSaved }: MembershipDia
             <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-foreground">Current Membership</p>
-                <MembershipBadge level={currentMembership.plan.name} />
+                <MembershipBadge planLevel={currentMembership.plan.level} planName={currentMembership.plan.name} />
               </div>
               <p className="text-xs text-muted-foreground">
                 {formatCurrency(currentMembership.plan.price)}/{currentMembership.plan.billingCycle.toLowerCase()}

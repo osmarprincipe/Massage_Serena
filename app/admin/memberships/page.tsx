@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type React from "react";
-import { Crown, Star, Sparkles, Users, Check, Edit2, Plus, Archive } from "lucide-react";
+import { Users, Check, Edit2, Plus, Archive, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, formatDate, getInitials } from "@/lib/utils";
 import { MembershipBadge } from "@/components/shared/MembershipBadge";
@@ -11,18 +11,8 @@ import { SectionHeader } from "@/components/shared/SectionHeader";
 import { Skeleton } from "@/components/shared/LoadingSkeleton";
 import { Button } from "@/components/ui/button";
 import { PlanDialog } from "@/components/memberships/PlanDialog";
-
-const planIcons: Record<string, any> = { Normal: Star, VIP: Crown, Premium: Sparkles };
-const planCardStyles: Record<string, React.CSSProperties> = {
-  Normal:  { background: "#181312", border: "1px solid rgba(255,255,255,0.07)" },
-  VIP:     { background: "linear-gradient(145deg, #1e0a10 0%, #181312 100%)", border: "1px solid rgba(122,12,28,0.25)" },
-  Premium: { background: "linear-gradient(145deg, #1a1508 0%, #181312 100%)", border: "1px solid rgba(212,175,55,0.20)" },
-};
-const planAccentStyles: Record<string, React.CSSProperties> = {
-  Normal:  { background: "rgba(40,35,32,0.90)", color: "#cbbfb6" },
-  VIP:     { background: "rgba(122,12,28,0.30)", color: "#e8a0a8" },
-  Premium: { background: "rgba(180,140,20,0.20)", color: "#d4af37" },
-};
+import { PlanCardsLayout } from "@/components/memberships/PlanCardsLayout";
+import { getPlanTier, getTierIcon, tierCardStyles, tierAccentStyles } from "@/lib/plan-style";
 
 export default function MembershipsPage() {
   const [plans, setPlans] = useState<any[]>([]);
@@ -124,19 +114,22 @@ export default function MembershipsPage() {
       </div>
 
       {/* Plan Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <PlanCardsLayout count={loading ? 3 : plans.length}>
         {loading
           ? [0, 1, 2].map((i) => <Skeleton key={i} className="h-80 rounded-2xl" />)
-          : plans.map((plan) => {
-              const Icon = planIcons[plan.name] || Crown;
+          : (() => {
+              const maxLevel = plans.length > 0 ? Math.max(...plans.map((p: any) => p.level ?? 0)) : 1;
+              return plans.map((plan) => {
+              const tier = getPlanTier(plan.level, maxLevel);
+              const Icon = getTierIcon(tier);
               const features = (() => {
                 try { return JSON.parse(plan.features || "[]") as string[]; }
                 catch { return [] as string[]; }
               })();
               const activeMembers: any[] = plan.userMemberships || [];
               const totalCount: number = plan._count?.userMemberships ?? activeMembers.length;
-              const cardStyle = planCardStyles[plan.name] || { background: "#181312", border: "1px solid rgba(255,255,255,0.07)" };
-              const accentStyle = planAccentStyles[plan.name] || { background: "rgba(40,35,32,0.90)", color: "#cbbfb6" };
+              const cardStyle = tierCardStyles[tier];
+              const accentStyle = tierAccentStyles[tier];
               const isArchiving = archivingId === plan.id;
 
               return (
@@ -197,7 +190,7 @@ export default function MembershipsPage() {
                     <div className="p-3 rounded-xl" style={accentStyle}>
                       <Icon className="h-5 w-5" />
                     </div>
-                    <MembershipBadge level={plan.name} size="md" />
+                    <MembershipBadge planLevel={plan.level} planName={plan.name} maxLevel={maxLevel} size="md" />
                   </div>
 
                   {/* Price */}
@@ -258,8 +251,9 @@ export default function MembershipsPage() {
                   </div>
                 </div>
               );
-            })}
-      </div>
+            });
+          })()}
+      </PlanCardsLayout>
 
       {/* Recent Subscriptions */}
       <div className="rounded-2xl border overflow-hidden"
@@ -303,7 +297,7 @@ export default function MembershipsPage() {
                   </p>
                   <p className="text-xs text-muted-foreground">{sub.user.email}</p>
                 </div>
-                <MembershipBadge level={sub.plan.name} size="sm" />
+                <MembershipBadge planLevel={sub.plan.level} planName={sub.plan.name} size="sm" />
                 <StatusBadge status={sub.status} />
                 <span className="text-sm font-medium text-foreground hidden md:block">
                   {formatCurrency(sub.plan.price)}

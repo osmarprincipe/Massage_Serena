@@ -142,7 +142,7 @@ export default function UsersPage() {
                       </td>
                       <td className="px-4 py-4">
                         {activeMembership ? (
-                          <MembershipBadge level={activeMembership.plan.name} />
+                          <MembershipBadge planLevel={activeMembership.plan.level} planName={activeMembership.plan.name} />
                         ) : (
                           <span className="text-xs text-muted-foreground italic">No membership</span>
                         )}

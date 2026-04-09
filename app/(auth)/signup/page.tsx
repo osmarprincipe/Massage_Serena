@@ -29,6 +29,8 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  // Plan name hint passed from the payment → login → signup chain.
+  const pendingPlan = searchParams.get("plan") || null;
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -78,7 +80,11 @@ function SignupForm() {
     }
   };
 
-  const loginUrl = `/login${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`;
+  const loginParams = new URLSearchParams();
+  if (callbackUrl !== "/") loginParams.set("callbackUrl", callbackUrl);
+  if (pendingPlan) loginParams.set("plan", pendingPlan);
+  const loginQuery = loginParams.toString();
+  const loginUrl = `/login${loginQuery ? `?${loginQuery}` : ""}`;
 
   const inputStyle = (field: string, hasError: boolean) => ({
     width: "100%",
@@ -102,6 +108,24 @@ function SignupForm() {
 
   return (
     <div className="w-full space-y-5">
+      {/* Purchase context banner — shown when arriving via the payment flow */}
+      {pendingPlan && (
+        <div
+          className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl"
+          style={{
+            background: "rgba(122,12,28,0.16)",
+            border: "1px solid rgba(177,18,38,0.22)",
+          }}
+        >
+          <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "#c6a15b" }} />
+          <p className="text-[12px] leading-snug" style={{ color: "rgba(203,191,182,0.70)" }}>
+            Create an account to continue with the{" "}
+            <span className="font-semibold" style={{ color: "#c6a15b" }}>{pendingPlan}</span>
+            {" "}membership
+          </p>
+        </div>
+      )}
+
       {/* Logo */}
       <div className="flex items-center gap-2.5 mb-1">
         <div className="p-2 rounded-xl" style={{ background: "linear-gradient(135deg, #a1122f, #c6293e)", boxShadow: "0 0 18px rgba(161,18,47,0.40)" }}>

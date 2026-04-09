@@ -1,43 +1,17 @@
 import { cn } from "@/lib/utils";
-import { Crown, Star, Sparkles } from "lucide-react";
+import { getPlanTier, getTierIcon, tierBadgeStyles } from "@/lib/plan-style";
 
 interface MembershipBadgeProps {
-  level: string;
+  /** The plan's numeric level (from DB) */
+  planLevel: number;
+  /** The plan's display name (free text — not used for styling) */
+  planName: string;
+  /** Max level across all plans — enables relative tier calculation. Omit for absolute thresholds. */
+  maxLevel?: number;
   size?: "sm" | "md" | "lg";
   showIcon?: boolean;
   className?: string;
 }
-
-const configs = {
-  Normal: {
-    style: {
-      background: "rgba(28, 22, 20, 0.90)",
-      color: "#cbbfb6",
-      border: "1px solid rgba(138, 127, 120, 0.20)",
-    },
-    icon: Star,
-    label: "Normal",
-  },
-  VIP: {
-    style: {
-      background: "linear-gradient(135deg, rgba(122,12,28,0.32) 0%, rgba(90,8,20,0.22) 100%)",
-      color: "#f0b8c0",
-      border: "1px solid rgba(177,18,38,0.30)",
-    },
-    icon: Crown,
-    label: "VIP",
-  },
-  Premium: {
-    style: {
-      background: "linear-gradient(135deg, rgba(180,140,20,0.26) 0%, rgba(212,175,55,0.16) 100%)",
-      color: "#d4af37",
-      border: "1px solid rgba(212,175,55,0.32)",
-      boxShadow: "0 0 10px rgba(212,175,55,0.12)",
-    },
-    icon: Sparkles,
-    label: "Premium",
-  },
-};
 
 const sizes = {
   sm: "px-2 py-0.5 text-[10px] gap-1",
@@ -52,13 +26,15 @@ const iconSizes = {
 };
 
 export function MembershipBadge({
-  level,
+  planLevel,
+  planName,
+  maxLevel,
   size = "md",
   showIcon = true,
   className,
 }: MembershipBadgeProps) {
-  const config = configs[level as keyof typeof configs] || configs.Normal;
-  const Icon = config.icon;
+  const tier = getPlanTier(planLevel, maxLevel);
+  const Icon = getTierIcon(tier);
 
   return (
     <span
@@ -67,10 +43,10 @@ export function MembershipBadge({
         sizes[size],
         className
       )}
-      style={config.style}
+      style={tierBadgeStyles[tier]}
     >
       {showIcon && <Icon className={iconSizes[size]} />}
-      {config.label}
+      {planName}
     </span>
   );
 }

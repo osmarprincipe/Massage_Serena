@@ -289,7 +289,7 @@ function ContentCard({
             </span>
           )}
           {item.membershipAccess.slice(0, 2).map((a) => (
-            <MembershipBadge key={a.plan.name} level={a.plan.name} size="sm" showIcon={false} />
+            <MembershipBadge key={a.plan.name} planLevel={a.plan.level} planName={a.plan.name} size="sm" showIcon={false} />
           ))}
         </div>
 
@@ -473,7 +473,7 @@ export default function MyContentPage() {
           </div>
           {activeMembership && (
             <div className="shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/50 border border-border/60 backdrop-blur-sm transition-all duration-200 hover:bg-muted/70">
-              <MembershipBadge level={activeMembership.plan.name} size="sm" />
+              <MembershipBadge planLevel={activeMembership.plan.level} planName={activeMembership.plan.name} size="sm" />
               <span className="text-[11px] text-muted-foreground/75 hidden sm:inline">membership</span>
             </div>
           )}

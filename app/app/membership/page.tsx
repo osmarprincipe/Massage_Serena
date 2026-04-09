@@ -3,27 +3,20 @@
 import { useEffect, useState } from "react";
 import type React from "react";
 import {
-  Crown, Star, Sparkles, Check, ArrowRight, Calendar,
-  TrendingUp, AlertCircle, Clock, RefreshCw,
+  Check, ArrowRight, Calendar,
+  AlertCircle, Clock, RefreshCw,
 } from "lucide-react";
 import { MembershipBadge } from "@/components/shared/MembershipBadge";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Skeleton } from "@/components/shared/LoadingSkeleton";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import {
+  getPlanTier, getTierIcon,
+  tierCardStyles, tierAccentStyles, tierBoxShadowActive, tierGlowColor,
+} from "@/lib/plan-style";
+import { PlanCardsLayout } from "@/components/memberships/PlanCardsLayout";
 import Link from "next/link";
 import { toast } from "sonner";
-
-const planIcons = { Normal: Star, VIP: Crown, Premium: Sparkles };
-const planCardStyles: Record<string, React.CSSProperties> = {
-  Normal:  { background: "#181312", border: "1px solid rgba(255,255,255,0.07)" },
-  VIP:     { background: "linear-gradient(145deg, #1e0a10 0%, #181312 100%)", border: "1px solid rgba(122,12,28,0.25)" },
-  Premium: { background: "linear-gradient(145deg, #1a1508 0%, #181312 100%)", border: "1px solid rgba(212,175,55,0.20)" },
-};
-const planIconStyles: Record<string, React.CSSProperties> = {
-  Normal:  { background: "rgba(40,35,32,0.90)", color: "#cbbfb6" },
-  VIP:     { background: "rgba(122,12,28,0.30)", color: "#e8a0a8" },
-  Premium: { background: "rgba(180,140,20,0.20)", color: "#d4af37" },
-};
 
 export default function MyMembershipPage() {
   const [data, setData] = useState<any>(null);
@@ -50,6 +43,7 @@ export default function MyMembershipPage() {
   }
 
   const { activeMembership, allPlans, history } = data || {};
+  const maxLevel: number = Math.max(0, ...(allPlans || []).map((p: any) => p.level ?? 0));
 
   return (
     <div className="px-6 py-10 max-w-3xl mx-auto space-y-10">
@@ -68,15 +62,13 @@ export default function MyMembershipPage() {
         <div
           className="relative overflow-hidden rounded-2xl p-6 transition-all duration-[350ms] ease-out hover:-translate-y-0.5"
           style={{
-            ...(planCardStyles[activeMembership.plan.name] || { background: "#181312", border: "1px solid rgba(255,255,255,0.07)" }),
-            boxShadow: activeMembership.plan.name === "Premium"
-              ? "0 8px 48px rgba(212,175,55,0.15), 0 2px 8px rgba(0,0,0,0.50)"
-              : "0 8px 48px rgba(122,12,28,0.20), 0 2px 8px rgba(0,0,0,0.50)",
+            ...tierCardStyles[getPlanTier(activeMembership.plan.level, maxLevel)],
+            boxShadow: tierBoxShadowActive[getPlanTier(activeMembership.plan.level, maxLevel)],
           }}
         >
           {/* Ambient glows */}
           <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full blur-3xl pointer-events-none"
-            style={{ background: activeMembership.plan.name === "Premium" ? "rgba(212,175,55,0.08)" : "rgba(177,18,38,0.10)" }} />
+            style={{ background: tierGlowColor[getPlanTier(activeMembership.plan.level, maxLevel)] }} />
           <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full blur-2xl pointer-events-none"
             style={{ background: "rgba(122,12,28,0.08)" }} />
           <div className="relative z-10">
@@ -87,7 +79,7 @@ export default function MyMembershipPage() {
                   <h2 className="text-2xl font-bold font-display text-foreground tracking-tight">
                     {activeMembership.plan.name}
                   </h2>
-                  <MembershipBadge level={activeMembership.plan.name} size="md" />
+                  <MembershipBadge planLevel={activeMembership.plan.level} planName={activeMembership.plan.name} maxLevel={maxLevel} size="md" />
                 </div>
                 <p className="text-muted-foreground/80 text-sm mt-1.5">
                   {formatCurrency(activeMembership.plan.price)} /{activeMembership.plan.billingCycle.toLowerCase()}
@@ -171,13 +163,14 @@ export default function MyMembershipPage() {
         <h2 className="text-lg font-semibold font-display text-foreground">
           {activeMembership ? "Other Plans" : "Available Plans"}
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <PlanCardsLayout count={(allPlans || []).length}>
           {(allPlans || []).map((plan: any) => {
-            const Icon = planIcons[plan.name as keyof typeof planIcons] || Crown;
+            const tier = getPlanTier(plan.level, maxLevel);
+            const Icon = getTierIcon(tier);
             const isActive = activeMembership?.planId === plan.id;
             const features = JSON.parse(plan.features) as string[];
-            const cardStyle = planCardStyles[plan.name] || { background: "#181312", border: "1px solid rgba(255,255,255,0.07)" };
-            const iconStyle = planIconStyles[plan.name] || { background: "rgba(40,35,32,0.90)", color: "#cbbfb6" };
+            const cardStyle = tierCardStyles[tier];
+            const iconStyle = tierAccentStyles[tier];
 
             return (
               <div
@@ -248,7 +241,7 @@ export default function MyMembershipPage() {
               </div>
             );
           })}
-        </div>
+        </PlanCardsLayout>
       </div>
 
       {/* History */}

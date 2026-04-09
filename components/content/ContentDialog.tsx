@@ -362,7 +362,7 @@ export function ContentDialog({ open, onClose, content, album, onSaved }: Conten
               ) : (
                 <Square className="h-4 w-4 text-muted-foreground shrink-0" />
               )}
-              <MembershipBadge level={plan.name} size="sm" showIcon={false} />
+              <MembershipBadge planLevel={plan.level} planName={plan.name} size="sm" showIcon={false} />
             </button>
           );
         })}

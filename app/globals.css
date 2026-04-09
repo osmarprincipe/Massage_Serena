@@ -438,6 +438,23 @@
     text-wrap: balance;
   }
 
+  /* ── Scrollbar hidden (carousel) ── */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Plan carousel: each direct child becomes a fixed-width snap item ── */
+  .plan-carousel-track > * {
+    flex: 0 0 300px;
+    scroll-snap-align: start;
+    /* Prevent the card itself from clipping its own shadow / glow */
+    overflow: visible;
+  }
+
   /* ── Login video — slow cinematic breathe ── */
   .video-bg-breathe {
     animation: video-breathe 9s ease-in-out infinite;

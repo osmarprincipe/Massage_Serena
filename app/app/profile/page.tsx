@@ -143,7 +143,7 @@ export default function MyProfilePage() {
           <div className="flex items-center gap-2 mt-2">
             <StatusBadge status={userData?.status || "ACTIVE"} />
             {activeMembership && (
-              <MembershipBadge level={activeMembership.plan.name} size="sm" />
+              <MembershipBadge planLevel={activeMembership.plan.level} planName={activeMembership.plan.name} size="sm" />
             )}
             {userData?.emailVerified && (
               <span className="flex items-center gap-1 text-xs text-emerald-600">

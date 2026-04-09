@@ -14,6 +14,7 @@ import {
 import { StatCard } from "@/components/shared/StatCard";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { MembershipBadge } from "@/components/shared/MembershipBadge";
+import { getPlanTier, tierBarColor } from "@/lib/plan-style";
 import { formatRelativeDate, formatCurrency, formatDate } from "@/lib/utils";
 import { startOfDay, endOfDay } from "date-fns";
 import Link from "next/link";
@@ -57,12 +58,16 @@ async function getDashboardData() {
     }),
   ]);
 
-  const plans = await prisma.membershipPlan.findMany({ select: { id: true, name: true } });
-  const planMap = Object.fromEntries(plans.map((p) => [p.id, p.name]));
-  const breakdown: Record<string, number> = { Normal: 0, VIP: 0, Premium: 0 };
+  const plans = await prisma.membershipPlan.findMany({
+    select: { id: true, name: true, level: true },
+    where: { isActive: true },
+    orderBy: { level: "asc" },
+  });
+  const planMap = Object.fromEntries(plans.map((p) => [p.id, p]));
+  const breakdown: Record<string, { count: number; level: number; name: string }> = {};
+  plans.forEach((p) => { breakdown[p.id] = { count: 0, level: p.level, name: p.name }; });
   membershipBreakdown.forEach((m) => {
-    const name = planMap[m.planId];
-    if (name) breakdown[name] = m._count;
+    if (breakdown[m.planId]) breakdown[m.planId].count = m._count;
   });
 
   return {
@@ -73,6 +78,7 @@ async function getDashboardData() {
     recentBookings,
     upcomingBookings,
     membershipBreakdown: breakdown,
+    membershipPlans: plans,
   };
 }
 
@@ -235,33 +241,35 @@ export default async function DashboardPage() {
             </div>
 
             <div className="p-5 space-y-4">
-              {(["Normal", "VIP", "Premium"] as const).map((tier) => {
-                const count = data.membershipBreakdown[tier] || 0;
-                const pct = data.activeMemberships > 0
-                  ? Math.round((count / data.activeMemberships) * 100)
-                  : 0;
-                const barColors = {
-                  Normal:  "rgba(138,127,120,0.55)",
-                  VIP:     "linear-gradient(90deg, #b11226, rgba(177,18,38,0.60))",
-                  Premium: "linear-gradient(90deg, #d4af37, rgba(212,175,55,0.55))",
-                };
-                return (
-                  <div key={tier} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <MembershipBadge level={tier} size="sm" />
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-semibold text-foreground tabular-nums" style={{ letterSpacing: "-0.01em" }}>
-                          {count}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground" style={{ opacity: 0.55 }}>({pct}%)</span>
+              {(() => {
+                const maxLevel = data.membershipPlans.length > 0
+                  ? Math.max(...data.membershipPlans.map((p: any) => p.level))
+                  : 1;
+                return Object.values(data.membershipBreakdown)
+                  .sort((a: any, b: any) => a.level - b.level)
+                  .map((entry: any) => {
+                    const tier = getPlanTier(entry.level, maxLevel);
+                    const pct = data.activeMemberships > 0
+                      ? Math.round((entry.count / data.activeMemberships) * 100)
+                      : 0;
+                    return (
+                      <div key={entry.name} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <MembershipBadge planLevel={entry.level} planName={entry.name} maxLevel={maxLevel} size="sm" />
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-semibold text-foreground tabular-nums" style={{ letterSpacing: "-0.01em" }}>
+                              {entry.count}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground" style={{ opacity: 0.55 }}>({pct}%)</span>
+                          </div>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: tierBarColor[tier] }} />
+                        </div>
                       </div>
-                    </div>
-                    <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: barColors[tier] }} />
-                    </div>
-                  </div>
-                );
-              })}
+                    );
+                  });
+              })()}
             </div>
 
             <div className="px-5 pb-5">

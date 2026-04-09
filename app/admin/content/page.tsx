@@ -249,8 +249,10 @@ export default function ContentPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {items.map((item) => {
             const MediaIcon = mediaTypeIcons[item.mediaType || ""] || FileText;
-            const membershipLevels = item.membershipAccess?.map((a: any) => a.plan.name) || [];
-            const isAccessible = membershipLevels.length > 0;
+            const membershipPlans: { name: string; level: number }[] =
+              item.membershipAccess?.map((a: any) => ({ name: a.plan.name, level: a.plan.level ?? 1 })) || [];
+            const isAccessible = membershipPlans.length > 0;
+            const planMaxLevel = membershipPlans.length > 0 ? Math.max(...membershipPlans.map((p) => p.level)) : 1;
             const thumbUrl = item._type === "album" ? item.coverImageUrl : item.thumbnailUrl;
             const itemCount = item._type === "album" ? item._count?.items : undefined;
 
@@ -343,10 +345,10 @@ export default function ContentPage() {
                   )}
 
                   <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                    {membershipLevels.map((level: string) => (
-                      <MembershipBadge key={level} level={level} size="sm" showIcon={false} />
+                    {membershipPlans.map((p) => (
+                      <MembershipBadge key={p.name} planLevel={p.level} planName={p.name} maxLevel={planMaxLevel} size="sm" showIcon={false} />
                     ))}
-                    {membershipLevels.length === 0 && (
+                    {membershipPlans.length === 0 && (
                       <span className="text-[11px] text-muted-foreground/70 italic">No access defined</span>
                     )}
                   </div>

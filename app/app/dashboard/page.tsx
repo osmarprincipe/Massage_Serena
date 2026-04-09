@@ -131,7 +131,7 @@ export default async function UserDashboardPage() {
 
             {activeMembership ? (
               <div className="flex items-center gap-2.5 pt-0.5">
-                <MembershipBadge level={activeMembership.plan.name} size="md" />
+                <MembershipBadge planLevel={activeMembership.plan.level} planName={activeMembership.plan.name} size="md" />
                 <span className="text-xs" style={{ color: "rgba(245,237,230,0.45)" }}>
                   since {formatDate(activeMembership.startDate, "MMMM yyyy")}
                 </span>
@@ -437,7 +437,7 @@ export default async function UserDashboardPage() {
       )}
 
       {/* ── Upgrade CTA ── */}
-      {activeMembership && activeMembership.plan.level < 3 && (
+      {activeMembership && (
         <div
           className="relative overflow-hidden rounded-2xl p-6"
           style={{
@@ -463,7 +463,7 @@ export default async function UserDashboardPage() {
                   className="font-semibold text-foreground"
                   style={{ letterSpacing: "-0.01em" }}
                 >
-                  Unlock more with {activeMembership.plan.level === 1 ? "VIP" : "Premium"}
+                  Upgrade your membership
                 </p>
                 <p className="text-sm text-muted-foreground mt-0.5" style={{ opacity: 0.70 }}>
                   Exclusive content and priority booking access
