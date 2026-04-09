@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { getAppUrl } from "@/lib/app-url";
 
 const schema = z.object({
   contentId: z.string().min(1),
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "You already own this content" }, { status: 409 });
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = getAppUrl();
 
   let stripeSession;
   try {

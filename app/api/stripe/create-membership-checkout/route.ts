@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { getAppUrl } from "@/lib/app-url";
 
 const schema = z.object({
   planId: z.string().min(1),
@@ -92,7 +93,8 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Create Stripe Checkout Session ────────────────────────────────────────
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = getAppUrl();
+  console.log(`[membership-checkout] Base URL resolved: ${appUrl}`);
 
   console.log(`[membership-checkout] Creating Stripe session: user=${userId} plan=${planId} stripePriceId=${stripePriceId}`);
 
