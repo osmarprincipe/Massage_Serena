@@ -218,7 +218,10 @@ function PaymentContent() {
               </p>
             </div>
 
-            {/* Plan Cards */}
+            {/* Plan Cards — pt-8 adds true padding above the carousel, independent
+                of the parent space-y selector which has higher CSS specificity
+                than mt-* utilities and would silently override them. */}
+            <div className="pt-8">
             <PlanCardsLayout count={plansLoading ? 3 : plans.length}>
               {plansLoading && [0, 1, 2].map((i) => (
                 <div key={i} className="rounded-2xl h-72" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", animation: "pulse 2s infinite" }} />
@@ -294,6 +297,7 @@ function PaymentContent() {
                 );
               })}
             </PlanCardsLayout>
+            </div>
 
             {/* CTA */}
             <div className="flex flex-col items-center gap-3">
