@@ -175,7 +175,7 @@ export default function MyMembershipPage() {
             return (
               <div
                 key={plan.id}
-                className={`relative rounded-2xl p-5 transition-all duration-[350ms] ease-out ${isActive ? "-translate-y-1" : "hover:-translate-y-1.5"}`}
+                className={`relative rounded-2xl p-5 flex flex-col transition-all duration-[350ms] ease-out ${isActive ? "-translate-y-1" : "hover:-translate-y-1.5"}`}
                 style={{
                   ...cardStyle,
                   boxShadow: isActive
@@ -194,36 +194,40 @@ export default function MyMembershipPage() {
                   </div>
                 )}
 
-                <div className="p-2.5 rounded-xl inline-flex mb-3.5" style={iconStyle}>
-                  <Icon className="h-4 w-4" />
+                {/* Growing content area — pushes the CTA button to the card bottom */}
+                <div className="flex-1">
+                  <div className="p-2.5 rounded-xl inline-flex mb-3.5" style={iconStyle}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+
+                  <h3 className="font-bold font-display text-foreground mb-0.5 tracking-tight">{plan.name}</h3>
+                  <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed line-clamp-2">{plan.description}</p>
+
+                  <div className="flex items-baseline gap-1 mb-4">
+                    <span className="text-xl font-bold font-display text-foreground tracking-tight">
+                      {formatCurrency(plan.price)}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">/{plan.billingCycle.toLowerCase()}</span>
+                  </div>
+
+                  <ul className="space-y-1.5">
+                    {features.slice(0, 3).map((f: string, i: number) => (
+                      <li key={i} className="flex items-center gap-2 text-[11px] leading-relaxed" style={{ color: "rgba(245,237,230,0.60)" }}>
+                        <Check className="h-3 w-3 shrink-0" style={{ color: "rgba(74,222,128,0.75)" }} />
+                        {f}
+                      </li>
+                    ))}
+                    {features.length > 3 && (
+                      <li className="text-[11px] text-muted-foreground pl-5">+{features.length - 3} more</li>
+                    )}
+                  </ul>
                 </div>
 
-                <h3 className="font-bold font-display text-foreground mb-0.5 tracking-tight">{plan.name}</h3>
-                <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed line-clamp-2">{plan.description}</p>
-
-                <div className="flex items-baseline gap-1 mb-4">
-                  <span className="text-xl font-bold font-display text-foreground tracking-tight">
-                    {formatCurrency(plan.price)}
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">/{plan.billingCycle.toLowerCase()}</span>
-                </div>
-
-                <ul className="space-y-1.5 mb-4">
-                  {features.slice(0, 3).map((f: string, i: number) => (
-                    <li key={i} className="flex items-center gap-2 text-[11px] leading-relaxed" style={{ color: "rgba(245,237,230,0.60)" }}>
-                      <Check className="h-3 w-3 shrink-0" style={{ color: "rgba(74,222,128,0.75)" }} />
-                      {f}
-                    </li>
-                  ))}
-                  {features.length > 3 && (
-                    <li className="text-[11px] text-muted-foreground pl-5">+{features.length - 3} more</li>
-                  )}
-                </ul>
-
+                {/* CTA — always pinned to card bottom */}
                 {!isActive && (
                   <Link
                     href={`/payment?planId=${plan.id}`}
-                    className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-[11px] font-semibold transition-all duration-[250ms] ease-out active:scale-[0.98] hover:brightness-[1.22]"
+                    className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-[11px] font-semibold transition-all duration-[250ms] ease-out active:scale-[0.98] hover:brightness-[1.22] mt-4"
                     style={{
                       background: "linear-gradient(160deg, #7a0c1c 0%, #5c0815 55%, #3d0510 100%)",
                       color: "#f5ede6",

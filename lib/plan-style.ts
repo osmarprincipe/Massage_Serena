@@ -75,10 +75,10 @@ export const tierAccentStyles: Record<PlanTier, React.CSSProperties> = {
 
 /** Plan card background + border */
 export const tierCardStyles: Record<PlanTier, React.CSSProperties> = {
-  gold:    { background: "linear-gradient(145deg, #1a1508 0%, #181312 100%)", border: "1px solid rgba(212,175,55,0.20)" },
-  crimson: { background: "linear-gradient(145deg, #1e0a10 0%, #181312 100%)", border: "1px solid rgba(122,12,28,0.25)" },
-  mid:     { background: "linear-gradient(145deg, #1a0c10 0%, #181312 100%)", border: "1px solid rgba(122,12,28,0.12)" },
-  neutral: { background: "#181312",                                            border: "1px solid rgba(255,255,255,0.07)" },
+  gold:    { background: "transparent", border: "1px solid rgba(212,175,55,0.22)",  boxShadow: "0 0 0 0 transparent" },
+  crimson: { background: "transparent", border: "1px solid rgba(177,18,38,0.22)",   boxShadow: "0 0 0 0 transparent" },
+  mid:     { background: "transparent", border: "1px solid rgba(177,18,38,0.12)",   boxShadow: "0 0 0 0 transparent" },
+  neutral: { background: "transparent", border: "1px solid rgba(255,255,255,0.07)", boxShadow: "0 0 0 0 transparent" },
 };
 
 /** Selected state ring + glow (payment page card selection) */
