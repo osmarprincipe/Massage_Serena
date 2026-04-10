@@ -39,7 +39,7 @@ interface ContentItem {
   thumbnailUrl: string | null;
   separatePurchaseEnabled: boolean;
   separatePurchasePrice: number | null;
-  membershipAccess: { plan: { name: string } }[];
+  membershipAccess: { plan: { name: string; level: number } }[];
   isAccessible: boolean;
   isPurchased: boolean;
   includedInMembership: boolean;
