@@ -455,6 +455,36 @@
     overflow: visible;
   }
 
+  /* ── Glassmorphism backdrop (plan cards on cinematic background) ── */
+  .plan-card-glass {
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  /* ── Plan card feature list — animated collapse/expand ── */
+  .feature-expand {
+    overflow: hidden;
+    transition: max-height 0.30s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .feature-expand { transition: none; }
+  }
+
+  /* ── Benefit overlay — slides up from card bottom ── */
+  @keyframes slide-up-in {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .benefit-overlay {
+    animation: slide-up-in 0.22s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .benefit-overlay { animation: none; }
+  }
+
   /* ── Login video — slow cinematic breathe ── */
   .video-bg-breathe {
     animation: video-breathe 9s ease-in-out infinite;

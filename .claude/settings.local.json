@@ -16,7 +16,12 @@
       "Bash(taskkill /F /IM node.exe)",
       "Bash(DATABASE_URL=\"postgresql://postgres:SerenaRenan123%40@db.abgidadjwxefsdgovrrl.supabase.co:5432/postgres?sslmode=require\" npx prisma db push --skip-generate)",
       "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"spa luxury dark crm mobile responsive navigation drawer\" --domain ux -n 8)",
-      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"spa luxury dark crm mobile responsive navigation drawer\" --domain ux -n 8)"
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"spa luxury dark crm mobile responsive navigation drawer\" --domain ux -n 8)",
+      "Bash(python3 \"c:/Users/osmar/Desktop/Massage/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"luxury cinematic dark spa wellness premium sensual\" --design-system -p \"Serene Studio\" -f markdown)",
+      "Bash(node \"c:\\\\Users\\\\osmar\\\\Desktop\\\\Massage\\\\node_modules\\\\typescript\\\\bin\\\\tsc\" --noEmit --skipLibCheck)",
+      "Bash(node node_modules/typescript/bin/tsc --noEmit --skipLibCheck)",
+      "Bash(node node_modules/typescript/bin/tsc --noEmit --skipLibCheck --project tsconfig.json)",
+      "Bash(echo \"exit:$?\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\osmar\\Desktop\\Massage\\app\\admin",
