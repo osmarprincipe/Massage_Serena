@@ -448,7 +448,7 @@ export default function MyContentPage() {
   }
 
   const { included = [], purchased = [], locked = [], activeMembership } = data || {};
-  const hasAny = included.length + purchased.length + locked.length > 0;
+  const hasAny = accessible.length + locked.length > 0;
 
   return (
     <>
@@ -468,7 +468,7 @@ export default function MyContentPage() {
           <div>
             <h1 className="text-2xl font-bold font-display tracking-tight text-foreground">My Content</h1>
             <p className="text-muted-foreground/75 text-sm mt-1.5 leading-relaxed">
-              Your wellness library — included, purchased, and available to unlock
+              Your wellness library — everything you can access and more to explore
             </p>
           </div>
           {activeMembership && (
@@ -491,22 +491,11 @@ export default function MyContentPage() {
           </div>
         )}
 
-        {included.length > 0 && (
+        {accessible.length > 0 && (
           <section className="space-y-4">
-            <SectionTitle count={included.length}>Included in your membership</SectionTitle>
+            <SectionTitle count={accessible.length}>Available to You</SectionTitle>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-              {included.map((item) => (
-                <ContentCard key={item.id} item={item} onOpen={handleOpen} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {purchased.length > 0 && (
-          <section className="space-y-4">
-            <SectionTitle count={purchased.length}>Purchased by you</SectionTitle>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-              {purchased.map((item) => (
+              {accessible.map((item) => (
                 <ContentCard key={item.id} item={item} onOpen={handleOpen} />
               ))}
             </div>
@@ -516,7 +505,7 @@ export default function MyContentPage() {
         {locked.length > 0 && (
           <section className="space-y-4">
             <div className="flex items-center justify-between">
-              <SectionTitle count={locked.length}>Available to unlock</SectionTitle>
+              <SectionTitle count={locked.length}>Unlock More</SectionTitle>
               {!activeMembership && (
                 <Link
                   href="/app/membership"

@@ -97,9 +97,9 @@ export default async function UserDashboardPage() {
 
       {/* ── Hero Welcome ── */}
       <div
-        className="relative overflow-hidden rounded-3xl p-8"
+        className="relative overflow-hidden rounded-3xl p-8 plan-card-glass"
         style={{
-          background: "linear-gradient(145deg, #1e0a10 0%, #0f0b0a 55%, #150608 100%)",
+          background: "rgba(16,6,10,0.78)",
           border: "1px solid rgba(122,12,28,0.28)",
           boxShadow: "0 8px 48px rgba(122,12,28,0.22), 0 2px 10px rgba(0,0,0,0.55)",
         }}
@@ -172,10 +172,10 @@ export default async function UserDashboardPage() {
         {/* Membership */}
         <Link href="/app/membership" className="group block">
           <div
-            className="h-full rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-0.5 [box-shadow:0_4px_22px_rgba(0,0,0,0.52)] hover:[box-shadow:0_16px_48px_rgba(0,0,0,0.68),0_4px_16px_rgba(212,175,55,0.10)] hover:border-[rgba(212,175,55,0.12)]"
+            className="h-full rounded-2xl border p-5 plan-card-glass transition-all duration-300 hover:-translate-y-0.5 [box-shadow:0_4px_22px_rgba(0,0,0,0.52)] hover:[box-shadow:0_16px_48px_rgba(0,0,0,0.68),0_4px_16px_rgba(212,175,55,0.10)] hover:border-[rgba(212,175,55,0.12)]"
             style={{
-              background: "linear-gradient(145deg, #181312 0%, #1e1614 100%)",
-              borderColor: "rgba(255,255,255,0.06)",
+              background: "rgba(14,8,11,0.82)",
+              borderColor: "rgba(255,255,255,0.07)",
             }}
           >
             <div className="flex items-start justify-between mb-4">
@@ -302,10 +302,10 @@ export default async function UserDashboardPage() {
             {membershipContent.map((item) => (
               <div
                 key={item.id}
-                className="group rounded-2xl border overflow-hidden transition-all duration-[350ms] ease-out hover:-translate-y-1 [box-shadow:0_4px_22px_rgba(0,0,0,0.50)] hover:[box-shadow:0_20px_60px_rgba(0,0,0,0.70),0_6px_22px_rgba(122,12,28,0.18)] hover:border-[rgba(122,12,28,0.25)]"
+                className="group rounded-2xl border overflow-hidden plan-card-glass transition-all duration-[350ms] ease-out hover:-translate-y-1 [box-shadow:0_4px_22px_rgba(0,0,0,0.50)] hover:[box-shadow:0_20px_60px_rgba(0,0,0,0.70),0_6px_22px_rgba(122,12,28,0.18)] hover:border-[rgba(122,12,28,0.25)]"
                 style={{
-                  background: "#181312",
-                  borderColor: "rgba(255,255,255,0.06)",
+                  background: "rgba(12,7,9,0.84)",
+                  borderColor: "rgba(255,255,255,0.07)",
                 }}
               >
                 {/* Thumbnail */}
@@ -383,8 +383,8 @@ export default async function UserDashboardPage() {
                 key={item.id}
                 className="relative rounded-2xl border overflow-hidden"
                 style={{
-                  background: "linear-gradient(145deg, #181312 0%, #1e1614 100%)",
-                  borderColor: "rgba(255,255,255,0.06)",
+                  background: "rgba(12,7,9,0.84)",
+                  borderColor: "rgba(255,255,255,0.07)",
                   boxShadow: "0 4px 22px rgba(0,0,0,0.50)",
                 }}
               >
@@ -439,9 +439,9 @@ export default async function UserDashboardPage() {
       {/* ── Upgrade CTA ── */}
       {activeMembership && (
         <div
-          className="relative overflow-hidden rounded-2xl p-6"
+          className="relative overflow-hidden rounded-2xl p-6 plan-card-glass"
           style={{
-            background: "linear-gradient(145deg, #1a1508 0%, #110f04 100%)",
+            background: "rgba(14,10,4,0.82)",
             border: "1px solid rgba(212,175,55,0.18)",
             boxShadow: "0 4px 28px rgba(212,175,55,0.07)",
           }}

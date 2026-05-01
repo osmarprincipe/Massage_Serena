@@ -21,10 +21,10 @@ import { useState, useEffect } from "react";
 
 const navLinks = [
   { href: "/app/dashboard",  label: "Home",          icon: Home },
-  { href: "/app/membership", label: "My Membership",  icon: Crown },
   { href: "/app/content",    label: "My Content",     icon: PlaySquare },
-  { href: "/app/purchases",  label: "My Purchases",   icon: ShoppingBag },
   { href: "/app/bookings",   label: "My Bookings",    icon: Calendar },
+  { href: "/app/purchases",  label: "My Purchases",   icon: ShoppingBag },
+  { href: "/app/membership", label: "My Membership",  icon: Crown },
   { href: "/app/profile",    label: "My Profile",     icon: User },
 ];
 
@@ -62,7 +62,12 @@ export function UserNav() {
       ═══════════════════════════════════════════ */}
       <aside
         className="hidden lg:flex fixed inset-y-0 left-0 z-40 flex-col w-[240px] border-r"
-        style={{ background: "#0c090a", borderColor: "rgba(255,255,255,0.055)" }}
+        style={{
+          background: "rgba(7,3,5,0.88)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderColor: "rgba(255,255,255,0.07)",
+        }}
       >
         {/* Logo */}
         <div
@@ -195,8 +200,8 @@ export function UserNav() {
       <header
         className="lg:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-3 border-b backdrop-blur-md"
         style={{
-          background: "rgba(12, 9, 8, 0.92)",
-          borderColor: "rgba(255,255,255,0.06)",
+          background: "rgba(7,3,5,0.92)",
+          borderColor: "rgba(255,255,255,0.07)",
         }}
       >
         <div className="flex items-center gap-2.5">
@@ -242,7 +247,12 @@ export function UserNav() {
           "transition-transform duration-300 ease-in-out",
           drawerOpen ? "translate-x-0" : "-translate-x-full"
         )}
-        style={{ background: "#0c090a", borderColor: "rgba(255,255,255,0.07)" }}
+        style={{
+          background: "rgba(7,3,5,0.94)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderColor: "rgba(255,255,255,0.08)",
+        }}
         aria-label="Navigation menu"
       >
         {/* Drawer header with close button */}

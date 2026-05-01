@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type React from "react";
 import {
   ShoppingBag, Video, Music, FileText, Image as ImageIcon,
   Calendar, ArrowRight, Receipt,
@@ -12,12 +13,14 @@ import { toast } from "sonner";
 const mediaIcons: Record<string, any> = {
   VIDEO: Video, AUDIO: Music, PDF: FileText, IMAGE: ImageIcon, TEXT: FileText,
 };
-const mediaColors: Record<string, string> = {
-  VIDEO: "bg-blue-100 text-blue-600",
-  AUDIO: "bg-purple-100 text-purple-600",
-  PDF: "bg-red-100 text-red-600",
-  IMAGE: "bg-green-100 text-green-600",
-  TEXT: "bg-gray-100 text-gray-600",
+
+// Dark luxury palette — matches the cinematic member area
+const mediaColors: Record<string, React.CSSProperties> = {
+  VIDEO: { background: "rgba(122,12,28,0.30)",  color: "#f0b8c0" },
+  AUDIO: { background: "rgba(100,30,80,0.30)",  color: "#d4a0cc" },
+  PDF:   { background: "rgba(120,80,10,0.30)",  color: "#d4a055" },
+  IMAGE: { background: "rgba(180,140,20,0.22)", color: "#d4af37" },
+  TEXT:  { background: "rgba(40,35,32,0.85)",   color: "#8a7f78" },
 };
 
 export default function MyPurchasesPage() {
@@ -56,20 +59,34 @@ export default function MyPurchasesPage() {
         </p>
       </div>
 
-      {/* Summary Card */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-card rounded-2xl border border-border p-5" style={{ boxShadow: "var(--shadow-card)" }}>
+        <div
+          className="rounded-2xl border p-5 plan-card-glass"
+          style={{
+            background: "rgba(14,8,11,0.82)",
+            borderColor: "rgba(255,255,255,0.07)",
+            boxShadow: "var(--shadow-card)",
+          }}
+        >
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-xl bg-mocha-100 text-mocha-600">
+            <div className="p-2 rounded-xl" style={{ background: "rgba(122,12,28,0.22)", color: "#e8a0a8" }}>
               <ShoppingBag className="h-4 w-4" />
             </div>
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Purchases</p>
           </div>
           <p className="text-2xl font-bold font-display text-foreground">{purchases.length}</p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-5" style={{ boxShadow: "var(--shadow-card)" }}>
+        <div
+          className="rounded-2xl border p-5 plan-card-glass"
+          style={{
+            background: "rgba(14,8,11,0.82)",
+            borderColor: "rgba(255,255,255,0.07)",
+            boxShadow: "var(--shadow-card)",
+          }}
+        >
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-xl bg-gold-100 text-gold-600">
+            <div className="p-2 rounded-xl" style={{ background: "rgba(180,140,20,0.18)", color: "#d4af37" }}>
               <Receipt className="h-4 w-4" />
             </div>
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Spent</p>
@@ -94,27 +111,36 @@ export default function MyPurchasesPage() {
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Purchase History
           </h2>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
-            <div className="divide-y divide-border/50">
+          <div
+            className="rounded-2xl border overflow-hidden plan-card-glass"
+            style={{ background: "rgba(12,7,9,0.84)", borderColor: "rgba(255,255,255,0.07)" }}
+          >
+            <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
               {purchases.map((purchase: any) => {
                 const Icon = mediaIcons[purchase.content?.mediaType] || FileText;
                 return (
                   <div
                     key={purchase.id}
-                    className="flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors group"
+                    className="flex items-center gap-4 px-5 py-4 transition-colors group"
+                    style={{ borderColor: "rgba(255,255,255,0.05)" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                   >
                     {/* Thumbnail / icon */}
-                    <div className="relative h-14 w-14 rounded-xl overflow-hidden shrink-0 bg-gradient-to-br from-mocha-100 to-sand-200">
+                    <div
+                      className="relative h-14 w-14 rounded-xl overflow-hidden shrink-0"
+                      style={{ background: "rgba(40,20,15,0.65)" }}
+                    >
                       {purchase.content?.thumbnailUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={purchase.content.thumbnailUrl}
                           alt={purchase.content.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover brightness-90"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Icon className="h-5 w-5 text-mocha-400" />
+                          <Icon className="h-5 w-5" style={{ color: "rgba(203,191,182,0.50)" }} />
                         </div>
                       )}
                     </div>
@@ -125,7 +151,10 @@ export default function MyPurchasesPage() {
                         {purchase.content?.title || "Unknown content"}
                       </p>
                       <div className="flex items-center gap-3 mt-1">
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${mediaColors[purchase.content?.mediaType] || "bg-gray-100 text-gray-600"}`}>
+                        <span
+                          className="px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                          style={mediaColors[purchase.content?.mediaType] ?? { background: "rgba(40,35,32,0.85)", color: "#8a7f78" }}
+                        >
                           {purchase.content?.mediaType || "—"}
                         </span>
                         <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -140,7 +169,17 @@ export default function MyPurchasesPage() {
                       <span className="text-sm font-bold text-foreground">
                         {formatCurrency(purchase.pricePaid)}
                       </span>
-                      <button className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-foreground hover:bg-muted">
+                      <button className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                        style={{ border: "1px solid rgba(255,255,255,0.10)", color: "rgba(245,237,230,0.70)" }}
+                        onMouseEnter={e => {
+                          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+                          (e.currentTarget as HTMLElement).style.color = "#f5ede6";
+                        }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLElement).style.background = "transparent";
+                          (e.currentTarget as HTMLElement).style.color = "rgba(245,237,230,0.70)";
+                        }}
+                      >
                         Open <ArrowRight className="h-3 w-3" />
                       </button>
                     </div>
